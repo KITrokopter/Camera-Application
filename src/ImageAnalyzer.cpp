@@ -1,10 +1,12 @@
 #include "libfreenect.hpp"
 #include "ImageAnalyzer.hpp"
+#include <iostream>
 
 
 ImageAnalyzer::ImageAnalyzer(CvKinect* imageSource) {
 	this->imageSource = imageSource;
 	imageSource->setImageReceiver(this);
+	lastImage = 0;
 }
 
 void ImageAnalyzer::start() {
@@ -20,6 +22,8 @@ cv::Mat* ImageAnalyzer::getImage() {
 	if (lastImage == 0) {
 		return 0;
 	} else {
+		std::cout << "IA has image" << std::endl;
+		
 		return new cv::Mat(*lastImage);
 	}
 }

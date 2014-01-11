@@ -7,6 +7,7 @@ project(Camera-Application)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  rosconsole
 )
 
 ## System dependencies are found with CMake's conventions
@@ -110,7 +111,12 @@ add_executable(Camera-Application_node src/main.cpp src/CvKinect.cpp src/Mutex.c
 # add_dependencies(Camera-Application_node Camera-Application_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(Camera-Application_node
+target_link_libraries(Camera-Application_node ${catkin_LIBRARIES}
+  libopencv_core.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so
+)
+
+add_executable(TakePictureTest test/TestTakePicture.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp)
+target_link_libraries(TakePictureTest ${catkin_LIBRARIES}
   libopencv_core.so libopencv_highgui.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so
 )
 

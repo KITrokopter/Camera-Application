@@ -1,4 +1,4 @@
-#include <opencv2/core/mat.hpp>
+//#include <opencv2/core/mat.hpp>
 #include <iostream>
 
 #include "libfreenect.hpp"
