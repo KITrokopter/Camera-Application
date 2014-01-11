@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
 	
 	cv::namedWindow("rgb", CV_WINDOW_AUTOSIZE);
 	cv::imshow("rgb", *image);
-	cv::waitKey();
+	cv::waitKey(5000);
 	cv::destroyWindow("rgb");
 	
 	analyzer.stop();
