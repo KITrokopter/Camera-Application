@@ -94,24 +94,25 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  src/${PROJECT_NAME}/src
 )
 
 ## Declare a cpp library
-# add_library(Camera-Application
-#   src/${PROJECT_NAME}/Camera-Application.cpp
-# )
+#add_library(Camera-Application
+#  src/${PROJECT_NAME}/src/CvKinect.cpp
+#)
 
 ## Declare a cpp executable
-# add_executable(Camera-Application_node src/Camera-Application_node.cpp)
+add_executable(Camera-Application_node src/main.cpp src/CvKinect.cpp src/Mutex.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(Camera-Application_node Camera-Application_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(Camera-Application_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(Camera-Application_node
+  libopencv_core.so libopencv_highgui.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so
+)
 
 #############
 ## Install ##
