@@ -5,7 +5,7 @@
 
 class IImageReceiver {
 public:
-	virtual void receiveImage(Mat* image) = 0;
+	virtual void receiveImage(cv::Mat* image) = 0;
 };
 
 #endif // IIMAGE_RECEIVER_HPP

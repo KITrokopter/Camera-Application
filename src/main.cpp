@@ -1,8 +1,4 @@
-#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/mat.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
-#include <list>
-#include <vector>
 #include <iostream>
 
 #include "libfreenect.hpp"
@@ -14,7 +10,7 @@ int main(void) {
 	
 	Freenect::Freenect freenect;
 	CvKinect& device = freenect.createDevice<CvKinect>(0);
-	ImageAnalyzer analyzer(device);
+	ImageAnalyzer analyzer(&device);
 	
 	// Do ROS stuff
 }

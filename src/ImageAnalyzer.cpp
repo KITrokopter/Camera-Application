@@ -16,15 +16,15 @@ void ImageAnalyzer::stop() {
 }
 
 // Returns a shallow copy of the last image. The image matrix is the same as the image matrix of the internal image.
-Mat* ImageAnalyzer::getImage() {
+cv::Mat* ImageAnalyzer::getImage() {
 	if (lastImage == 0) {
 		return 0;
 	} else {
-		return new cv::Mat(lastImage);
+		return new cv::Mat(*lastImage);
 	}
 }
 
-void ImageAnalyzer::receiveImage(Mat* image) {
+void ImageAnalyzer::receiveImage(cv::Mat* image) {
 	lastImage = image;
 }
 

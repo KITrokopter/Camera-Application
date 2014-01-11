@@ -1,22 +1,22 @@
-#ifndef IMAGEANALYZER_HPP
-#define IMAGEANALYZER_HPP
+#ifndef IMAGE_ANALYZER_HPP
+#define IMAGE_ANALYZER_HPP
 
-#include <opencv/core/mat.hpp>
+//#include <opencv2/core/mat.hpp>
 #include "CvKinect.hpp"
 #include "IImageReceiver.hpp"
 
 class ImageAnalyzer : IImageReceiver {
 private:
-	Mat* lastImage;
+	cv::Mat* lastImage;
 	CvKinect* imageSource;
 	
 public:
 	ImageAnalyzer(CvKinect* imageSource);
 	void start();
 	void stop();
-	Mat* getImage();
-	void receiveImage(Mat* image);
+	cv::Mat* getImage();
+	void receiveImage(cv::Mat* image);
 	~ImageAnalyzer();
 };
 
-#endif // IMAGEANALYZER_HPP
+#endif // IMAGE_ANALYZER_HPP
