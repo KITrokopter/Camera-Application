@@ -25,6 +25,8 @@ class CvKinect : public Freenect::FreenectDevice {
 		
 		bool getDepth(cv::Mat& output);
 		
+		void setImageReceiver(ImageReceiver* receiver);
+		
 	private:
 		std::vector<uint8_t> m_buffer_depth;
 		std::vector<uint8_t> m_buffer_rgb;
@@ -36,6 +38,8 @@ class CvKinect : public Freenect::FreenectDevice {
 		Mutex m_depth_mutex;
 		bool m_new_rgb_frame;
 		bool m_new_depth_frame;
+		
+		ImageReceiver* imageReceiver = 0;
 };
 
 #endif // CV_KINECT_HPP

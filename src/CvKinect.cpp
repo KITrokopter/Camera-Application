@@ -20,6 +20,12 @@ void CvKinect::VideoCallback(void* _rgb, uint32_t timestamp) {
 	rgbMat.data = rgb;
 	m_new_rgb_frame = true;
 	m_rgb_mutex.unlock();
+	
+	if (imageReceiver != 0) {
+		cv::Mat* image = new cv::Mat(cv::Size(640,480), CV_8UC3, cv::Scalar(0));
+		getVideo(image);
+		imageReceiver->receiveImage(image);
+	}
 }
 
 // Do not call directly even in child
@@ -59,3 +65,6 @@ bool CvKinect::getDepth(cv::Mat& output) {
 		return false;
 	}
 }
+
+void CvKinect::setImageReceiver(ImageReceiver* receiver) {
+	imageReceiver = receiver;
