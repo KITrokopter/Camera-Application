@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>Camera-Application</name>
+  <name>camera_application</name>
   <version>0.0.0</version>
   <description>The Camera-Application package</description>
 
