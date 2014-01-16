@@ -5,7 +5,8 @@
 #include "CvKinect.hpp"
 #include "ImageAnalyzer.hpp"
 
-int main(void) {
+int main(void)
+{
 	std::cout << "Starting Camera Application" << std::endl;
 	
 	Freenect::Freenect freenect;

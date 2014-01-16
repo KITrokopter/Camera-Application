@@ -3,8 +3,14 @@
 
 #include <opencv2/core/mat.hpp>
 
-class IImageReceiver {
+class IImageReceiver
+{
 public:
+	/*
+	 * Function: receiveImage
+	 * 
+	 * Passes a copy of the received image.
+	 */
 	virtual void receiveImage(cv::Mat* image) = 0;
 };
 

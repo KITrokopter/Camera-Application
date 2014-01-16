@@ -5,15 +5,20 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <vector>
 
 #include "libfreenect.hpp"
 #include "Mutex.hpp"
 #include "IImageReceiver.hpp"
 
-class CvKinect : public Freenect::FreenectDevice {
+class CvKinect : public Freenect::FreenectDevice
+{
 
 
 	public:
+		static const int KINECT_IMAGE_WIDTH = 640;
+		static const int KINECT_IMAGE_HEIGHT = 480;
+		
 		CvKinect(freenect_context *_ctx, int _index);
 		
 		// Do not call directly even in child
@@ -26,7 +31,9 @@ class CvKinect : public Freenect::FreenectDevice {
 		
 		bool getDepth(cv::Mat& output);
 		
-		void setImageReceiver(IImageReceiver* receiver);
+		void addImageReceiver(IImageReceiver* receiver);
+		
+		void removeImageReceiver(IImageReceiver* receiver);
 		
 	private:
 		std::vector<uint8_t> m_buffer_depth;
@@ -40,7 +47,7 @@ class CvKinect : public Freenect::FreenectDevice {
 		bool m_new_rgb_frame;
 		bool m_new_depth_frame;
 		
-		IImageReceiver* imageReceiver;
+		std::vector<IImageReceiver*> imageReceivers;
 };
 
 #endif // CV_KINECT_HPP
