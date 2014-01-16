@@ -4,7 +4,7 @@
 
 ImageAnalyzer::ImageAnalyzer(CvKinect* imageSource) {
 	this->imageSource = imageSource;
-	imageSource->setImageReceiver(this);
+	imageSource->addImageReceiver(this);
 	lastImage = 0;
 }
 
@@ -21,15 +21,29 @@ cv::Mat* ImageAnalyzer::getImage() {
 	if (lastImage == 0) {
 		return 0;
 	} else {
-		return new cv::Mat(*lastImage);
+		imageMutex.lock();
+		cv::Mat* result = new cv::Mat(*lastImage);
+		imageMutex.unlock();
+		
+		return result;
 	}
 }
 
 void ImageAnalyzer::receiveImage(cv::Mat* image) {
+	imageMutex.lock();
+	
+	if (lastImage != 0) {
+		delete lastImage;
+	}
+	
 	lastImage = image;
+	
+	imageMutex.unlock();
 }
 
 ImageAnalyzer::~ImageAnalyzer() {
+	imageSource->removeImageReceiver(this);
+	
 	if (lastImage != 0) {
 		delete lastImage;
 	}

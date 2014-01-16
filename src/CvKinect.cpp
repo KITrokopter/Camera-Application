@@ -10,8 +10,6 @@ CvKinect::CvKinect(freenect_context *_ctx, int _index)
 		v = std::pow(v, 3) * 6;
 		m_gamma[i] = v * 6 * 256;
 	}
-	
-	imageReceiver = 0;
 }
 
 // Do not call directly even in child
@@ -23,10 +21,10 @@ void CvKinect::VideoCallback(void* _rgb, uint32_t timestamp) {
 	m_new_rgb_frame = true;
 	m_rgb_mutex.unlock();
 	
-	if (imageReceiver != 0) {
+	for (std::vector<IImageReceiver*>::iterator it = imageReceivers.begin(); it != imageReceivers.end(); it++) {
 		cv::Mat* image = new cv::Mat(cv::Size(640,480), CV_8UC3, cv::Scalar(0));
 		getVideo(*image);
-		imageReceiver->receiveImage(image);
+		(*it)->receiveImage(image);
 	}
 }
 
@@ -68,6 +66,14 @@ bool CvKinect::getDepth(cv::Mat& output) {
 	}
 }
 
-void CvKinect::setImageReceiver(IImageReceiver* receiver) {
-	imageReceiver = receiver;
+void CvKinect::addImageReceiver(IImageReceiver* receiver) {
+	imageReceivers.push_back(receiver);
+}
+
+void CvKinect::removeImageReceiver(IImageReceiver* receiver) {
+	for (std::vector<IImageReceiver*>::iterator it = imageReceivers.begin(); it != imageReceivers.end(); it++) {
+		if (*it == receiver) {
+			imageReceivers.erase(it);
+		}
+	}
 }

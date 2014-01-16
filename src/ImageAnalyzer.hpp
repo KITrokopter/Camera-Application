@@ -4,11 +4,13 @@
 //#include <opencv2/core/mat.hpp>
 #include "CvKinect.hpp"
 #include "IImageReceiver.hpp"
+#include "Mutex.hpp"
 
 class ImageAnalyzer : IImageReceiver {
 private:
 	cv::Mat* lastImage;
 	CvKinect* imageSource;
+	Mutex imageMutex;
 	
 public:
 	ImageAnalyzer(CvKinect* imageSource);
