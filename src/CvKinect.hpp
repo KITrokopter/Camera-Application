@@ -11,10 +11,14 @@
 #include "Mutex.hpp"
 #include "IImageReceiver.hpp"
 
-class CvKinect : public Freenect::FreenectDevice {
+class CvKinect : public Freenect::FreenectDevice
+{
 
 
 	public:
+		static const int KINECT_IMAGE_WIDTH = 640;
+		static const int KINECT_IMAGE_HEIGHT = 480;
+		
 		CvKinect(freenect_context *_ctx, int _index);
 		
 		// Do not call directly even in child

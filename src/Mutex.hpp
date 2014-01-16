@@ -3,7 +3,8 @@
 
 #include <pthread.h>
 
-class Mutex {
+class Mutex
+{
 	private:
 		pthread_mutex_t m_mutex;
 

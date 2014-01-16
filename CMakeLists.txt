@@ -104,7 +104,7 @@ include_directories(
 #)
 
 ## Declare a cpp executable
-add_executable(Camera-Application_node src/main.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp)
+add_executable(Camera-Application_node src/main.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp src/CvImageProcessor.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes

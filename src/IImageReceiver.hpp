@@ -3,7 +3,8 @@
 
 #include <opencv2/core/mat.hpp>
 
-class IImageReceiver {
+class IImageReceiver
+{
 public:
 	/*
 	 * Function: receiveImage
