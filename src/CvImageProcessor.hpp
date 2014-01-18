@@ -11,6 +11,7 @@
 class CvImageProcessor {
 private:
 	ImageAnalyzer* imageAnalyzer;
+	IImageReceiver* calibrationImageReceiver;
 	
 	std::vector<cv::Scalar> colorRanges;
 	cv::Mat* intrinsicsMatrix;
@@ -26,6 +27,8 @@ private:
 	int boardHeight;
 	float boardRectangleWidth;
 	float boardRectangleHeight;
+	
+	std::vector<cv::Point2f>* createObjectPoints();
 public:
 	CvImageProcessor(ImageAnalyzer* imageAnalyzer);
 	
@@ -35,6 +38,8 @@ public:
 	// Camera calibration.
 	void calibrateCamera();
 	void clearCalibrationImages();
+	void waitForCalibration();
+	cv::Mat* undistortImage(cv::Mat* inputImage);
 	
 	/*
 	 * Method: startCalibration
@@ -49,7 +54,7 @@ public:
 	 * boardRectangleWidth - The width of one board rectangle.
 	 * boardRectangleHeight - The height of one board rectangle.
 	 */
-	void startCalibration(int imageAmount, int imageDelay, int boardWidth, int boardHeight, float boardRectangleWidth, float boardRectangleHeight);
+	void startCalibration(int imageAmount, int imageDelay, int boardWidth, int boardHeight, float boardRectangleWidth, float boardRectangleHeight, IImageReceiver* calibrationImageReceiver);
 };
 
 #endif // CV_IMAGE_PROCESSOR_HPP
