@@ -2,6 +2,8 @@
 #include "Mutex.hpp"
 #include "CvKinect.hpp"
 
+#include <iostream>
+
 CvKinect::CvKinect(freenect_context *_ctx, int _index)
 			: Freenect::FreenectDevice(_ctx, _index), m_buffer_depth(FREENECT_DEPTH_11BIT),m_buffer_rgb(FREENECT_VIDEO_RGB), m_gamma(2048), m_new_rgb_frame(false), m_new_depth_frame(false),depthMat(cv::Size(640,480),CV_16UC1), rgbMat(cv::Size(640,480),CV_8UC3,cv::Scalar(0)), ownMat(cv::Size(640,480),CV_8UC3,cv::Scalar(0))
 {
@@ -77,9 +79,11 @@ void CvKinect::addImageReceiver(IImageReceiver* receiver)
 
 void CvKinect::removeImageReceiver(IImageReceiver* receiver)
 {
-	for (std::vector<IImageReceiver*>::iterator it = imageReceivers.begin(); it != imageReceivers.end(); it++) {
+	for (std::vector<IImageReceiver*>::iterator it = imageReceivers.begin(); it != imageReceivers.end();) {
 		if (*it == receiver) {
 			imageReceivers.erase(it);
+		} else {
+			it++;
 		}
 	}
 }

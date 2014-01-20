@@ -43,8 +43,6 @@ TestCalibration::~TestCalibration() {
 	}
 	
 	cv::destroyWindow("Calibration Test");
-	
-	std::cout << "TestCalibration deleted" << std::endl;
 }
 
 int main(int argc, char** argv)
@@ -68,4 +66,11 @@ int main(int argc, char** argv)
 	std::cout << "Shutting down ROS Node" << std::endl;
 	ros::shutdown();
 	std::cout << "ROS shutdown request sent" << std::endl;
+	
+	while (ros::ok()) {
+		std::cout << "Waiting for ros to terminate" << std::endl;
+		usleep(10000);
+	}
+	
+	exit(0);
 }

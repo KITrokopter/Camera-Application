@@ -58,10 +58,7 @@ void ImageAnalyzer::receiveImage(cv::Mat* image)
 
 ImageAnalyzer::~ImageAnalyzer()
 {
-	// TODO remove output
-	std::cout << "Pre ImageAnalyzer removeImageReceiver" << std::endl;
 	imageSource->removeImageReceiver(this);
-	std::cout << "Post ImageAnalyzer removeImageReceiver" << std::endl;
 	
 	if (lastImage != 0) {
 		delete lastImage;

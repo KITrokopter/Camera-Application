@@ -82,15 +82,15 @@ void CvImageProcessor::calibrateCamera()
 		allObjectPoints.push_back(objectPoints);
 	}
 	
-	// TODO temporary create custom image points
-	for (int i = 0; i < imageAmount; i++) {
+	// temporary create custom image points used for testing
+	/*for (int i = 0; i < imageAmount; i++) {
 		imagePoints.push_back(*createImagePoints());
-	}
+	}*/
 	
 	int successfulImageAmount = 0;
 	
 	// Loop until we got enough images for calibration.
-	/*while (successfulImageAmount < imageAmount) {
+	while (successfulImageAmount < imageAmount) {
 		// Wait a bit to give the user time to move the chessboard.
 		usleep(1000 * imageDelay);
 		
@@ -127,16 +127,16 @@ void CvImageProcessor::calibrateCamera()
 			std::cout << "Found bad image" << std::endl;
 			delete image;
 		}
-	}*/
+	}
 	
 	std::vector<cv::Mat> rvecs;
 	std::vector<cv::Mat> tvecs;
 	
-	std::cout << "Start calibration" << std::endl;
+	std::cout << "Start calibration calculation" << std::endl;
 	
 	// Calibrate camera.
 	// Use CV_CALIB_FIX_K3, since k3 is only really useful for fisheye lenses.
-	calibrationError = cv::calibrateCamera(allObjectPoints, imagePoints, cv::Size(CvKinect::KINECT_IMAGE_WIDTH, CvKinect::KINECT_IMAGE_HEIGHT), intrinsicsMatrix, distortionCoefficients, rvecs, tvecs, CV_CALIB_FIX_K3, cv::TermCriteria(cv::TermCriteria::COUNT /*| cv::TermCriteria::EPS*/, 1/*30*/, 1/*DBL_EPSILON*/));
+	calibrationError = cv::calibrateCamera(allObjectPoints, imagePoints, cv::Size(CvKinect::KINECT_IMAGE_WIDTH, CvKinect::KINECT_IMAGE_HEIGHT), intrinsicsMatrix, distortionCoefficients, rvecs, tvecs, CV_CALIB_FIX_K3, cv::TermCriteria(cv::TermCriteria::COUNT | cv::TermCriteria::EPS, 30, DBL_EPSILON));
 	
 	setIntrinsicsMatrix(&intrinsicsMatrix);
 	setDistortionCoefficients(&distortionCoefficients);
