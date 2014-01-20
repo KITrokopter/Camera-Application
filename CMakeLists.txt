@@ -103,16 +103,13 @@ include_directories(
 #  src/${PROJECT_NAME}/src/CvKinect.cpp
 #)
 
-## Declare a cpp executable
-add_executable(Camera-Application_node src/main.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp src/CvImageProcessor.cpp)
-
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(Camera-Application_node Camera-Application_generate_messages_cpp)
 
-## Specify libraries to link a library or executable target against
+add_executable(Camera-Application_node src/main.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp src/CvImageProcessor.cpp src/QuadcopterColor.cpp)
 target_link_libraries(Camera-Application_node ${catkin_LIBRARIES}
-  libopencv_core.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so
+  libopencv_core.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so libcvblob.so
 )
 
 add_executable(TestTakePicture test/TestTakePicture.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp)

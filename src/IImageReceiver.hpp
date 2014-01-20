@@ -1,7 +1,7 @@
 #ifndef IIMAGE_RECEIVER_HPP
 #define IIMAGE_RECEIVER_HPP
 
-#include <opencv2/core/mat.hpp>
+#include <opencv2/core/core.hpp>
 
 class IImageReceiver
 {

@@ -1,5 +1,5 @@
 #include "CvImageProcessor.hpp"
-#include <opencv/cv.h>
+#include <opencv2/calib3d/calib3d.hpp>
 #include <ros/console.h>
 #include <iostream>
 
@@ -141,7 +141,6 @@ void CvImageProcessor::calibrateCamera()
 	setIntrinsicsMatrix(&intrinsicsMatrix);
 	setDistortionCoefficients(&distortionCoefficients);
 	std::cout << "Calibration successful" << std::endl;
-	
 	
 	// Free object description
 	delete objectPoints;

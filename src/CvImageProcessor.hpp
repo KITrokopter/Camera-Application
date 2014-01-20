@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <opencv2/core/core.hpp>
-#include <opencv2/core/mat.hpp>
 #include <boost/thread.hpp>
 
 #include "ImageAnalyzer.hpp"

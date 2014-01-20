@@ -1,9 +1,6 @@
 #include "libfreenect.hpp"
 #include "ImageAnalyzer.hpp"
 
-#include <opencv/cv.h>
-
-
 ImageAnalyzer::ImageAnalyzer(CvKinect* imageSource)
 {
 	this->imageSource = imageSource;
