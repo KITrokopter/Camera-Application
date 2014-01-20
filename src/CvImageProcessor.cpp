@@ -76,10 +76,10 @@ void CvImageProcessor::calibrateCamera()
 	cv::Mat distortionCoefficients = cv::Mat::zeros(5, 1, CV_32F);
 	
 	// Fill object points with data about the chessboard
-	std::vector<cv::Point3f> objectPoints = *createObjectPoints();
+	std::vector<cv::Point3f>* objectPoints = createObjectPoints();
 	
 	for (int i = 0; i < imageAmount; i++) {
-		allObjectPoints.push_back(objectPoints);
+		allObjectPoints.push_back(*objectPoints);
 	}
 	
 	// temporary create custom image points used for testing
@@ -144,7 +144,7 @@ void CvImageProcessor::calibrateCamera()
 	
 	
 	// Free object description
-	//delete &objectPoints;
+	delete objectPoints;
 	
 	// If video wasn't started before, stop it.
 	if (!videoStarted) {
