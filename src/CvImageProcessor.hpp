@@ -21,7 +21,7 @@ private:
 	// Camera calibration.
 	boost::thread* calibrationThread;
 	volatile bool abortCalibration;
-	volatile bool calibrationError;
+	volatile double calibrationError;
 	int imageAmount;
 	int imageDelay;
 	int boardWidth;
@@ -40,7 +40,7 @@ public:
 	// Camera calibration.
 	void calibrateCamera();
 	void clearCalibrationImages();
-	bool waitForCalibration();
+	void waitForCalibration();
 	cv::Mat* undistortImage(cv::Mat* inputImage);
 	
 	/*
