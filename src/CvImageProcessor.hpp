@@ -21,6 +21,7 @@ private:
 	// Camera calibration.
 	boost::thread* calibrationThread;
 	volatile bool abortCalibration;
+	volatile bool calibrationError;
 	int imageAmount;
 	int imageDelay;
 	int boardWidth;
@@ -28,7 +29,8 @@ private:
 	float boardRectangleWidth;
 	float boardRectangleHeight;
 	
-	std::vector<cv::Point2f>* createObjectPoints();
+	std::vector<cv::Point3f>* createObjectPoints();
+	std::vector<cv::Point2f>* createImagePoints(); // TODO remove
 public:
 	CvImageProcessor(ImageAnalyzer* imageAnalyzer);
 	
@@ -38,7 +40,7 @@ public:
 	// Camera calibration.
 	void calibrateCamera();
 	void clearCalibrationImages();
-	void waitForCalibration();
+	bool waitForCalibration();
 	cv::Mat* undistortImage(cv::Mat* inputImage);
 	
 	/*
