@@ -13,9 +13,6 @@ private:
 	CvKinect* imageSource;
 	Mutex imageMutex;
 	bool videoStarted;
-	std::vector<cv::Scalar> minColors;
-	std::vector<cv::Scalar> maxColors;
-	std::vector<int> quadcopterIds;
 	
 public:
 	ImageAnalyzer(CvKinect* imageSource);
@@ -24,9 +21,6 @@ public:
 	bool isStarted();
 	cv::Mat* getImage();
 	void receiveImage(cv::Mat* image);
-	
-	void addQuadcopter(cv::Scalar minColor, cv::Scalar maxColor, int id);
-	void removeQuadcopter(int id);
 	
 	~ImageAnalyzer();
 };

@@ -20,6 +20,7 @@ bool startsWith(const char *prefix, const char *str)
 	return lenStr < lenPrefix ? false : strncmp(prefix, str, lenPrefix) == 0;
 }
 
+// Gets the ip address of the machine
 char* getIpAddress()
 {
 	struct ifaddrs * ifAddrStruct = NULL;

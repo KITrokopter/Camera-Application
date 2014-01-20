@@ -6,11 +6,15 @@
 #include <boost/thread.hpp>
 
 #include "ImageAnalyzer.hpp"
+#include "Tracker.hpp"
+#include "ITrackerDataReceiver.hpp"
 
-class CvImageProcessor {
+class CvImageProcessor
+{
 private:
 	ImageAnalyzer* imageAnalyzer;
 	IImageReceiver* calibrationImageReceiver;
+	ITrackerDataReceiver* dataReceiver;
 	
 	std::vector<cv::Scalar> colorRanges;
 	cv::Mat* intrinsicsMatrix;
@@ -28,10 +32,14 @@ private:
 	float boardRectangleWidth;
 	float boardRectangleHeight;
 	
+	// Tracking
+	std::vector<Tracker*> trackers;
+	
+	// Methods
 	std::vector<cv::Point3f>* createObjectPoints();
-	std::vector<cv::Point2f>* createImagePoints(); // TODO remove
+	std::vector<cv::Point2f>* createImagePoints();
 public:
-	CvImageProcessor(ImageAnalyzer* imageAnalyzer);
+	CvImageProcessor(ImageAnalyzer* imageAnalyzer, ITrackerDataReceiver* dataReceiver);
 	
 	void setIntrinsicsMatrix(cv::Mat* intrinsicsMatrix);
 	void setDistortionCoefficients(cv::Mat* distortionCoefficients);
@@ -56,6 +64,10 @@ public:
 	 * boardRectangleHeight - The height of one board rectangle.
 	 */
 	void startCalibration(int imageAmount, int imageDelay, int boardWidth, int boardHeight, float boardRectangleWidth, float boardRectangleHeight, IImageReceiver* calibrationImageReceiver);
+	
+	// Tracking
+	void addQuadcopter(QuadcopterColor* qc);
+	void removeQuadcopter(int id);
 };
 
 #endif // CV_IMAGE_PROCESSOR_HPP

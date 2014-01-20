@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 	
 	std::cout << "Starting calibration" << std::endl;
 	
-	CvImageProcessor processor(&analyzer);
+	CvImageProcessor processor(&analyzer, 0);
 	processor.startCalibration(3, 1000, 11, 8, 3, 3, &tc);
 	processor.waitForCalibration();
 	

@@ -3,12 +3,13 @@
 #include <ros/console.h>
 #include <iostream>
 
-CvImageProcessor::CvImageProcessor(ImageAnalyzer* imageAnalyzer)
+CvImageProcessor::CvImageProcessor(ImageAnalyzer* imageAnalyzer, ITrackerDataReceiver* dataReceiver)
 {
 	this->intrinsicsMatrix = 0;
 	this->distortionCoefficients = 0;
 	this->calibrationThread = 0;
 	this->imageAnalyzer = imageAnalyzer;
+	this->dataReceiver = dataReceiver;
 	this->calibrationImageReceiver = 0;
 }
 
@@ -164,7 +165,7 @@ void CvImageProcessor::clearCalibrationImages()
 void CvImageProcessor::waitForCalibration()
 {
 	calibrationThread->join();
-	free(calibrationThread);
+	delete calibrationThread;
 	calibrationThread = 0;
 }
 
