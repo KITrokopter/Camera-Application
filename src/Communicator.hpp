@@ -12,6 +12,9 @@
 // Subscribers
 #include "camera_application/PictureSendingActivation.h"
 
+// Publishers
+#include "camera_application/Picture.h"
+
 /*
  * Class: Communicator
  *
@@ -20,6 +23,8 @@
 class Communicator {
 	public:
 		Communicator(ImageAnalyzer *analyzer);
+
+		void sendPicture(camera_application::Picture::_image_type &data, uint64_t timestamp);
 
 	protected:
 		// Services
@@ -34,6 +39,7 @@ class Communicator {
 	private:
 		ros::ServiceServer initializeCameraService;
 		ros::Subscriber pictureSendingActivationSubscriber;
+		ros::Publisher picturePublisher;
 		ImageAnalyzer *analyzer;
 
 		// Initialization data

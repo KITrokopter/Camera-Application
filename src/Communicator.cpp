@@ -1,6 +1,8 @@
 
 #include "Communicator.hpp"
 
+#include <ctime>
+
 Communicator::Communicator(ImageAnalyzer *analyzer):
 	analyzer(analyzer),
 	initialized(false)
@@ -12,6 +14,21 @@ Communicator::Communicator(ImageAnalyzer *analyzer):
 
 	// Subscribers
 	this->pictureSendingActivationSubscriber = n.subscribe("picture_sending_activation", 1, &Communicator::handlePictureSendingActivation, this);
+
+	// Publishers
+	this->picturePublisher = n.advertise<camera_application::Picture>("picture", 1);
+}
+
+void Communicator::sendPicture(camera_application::Picture::_image_type &data, uint64_t timestamp)
+{
+	static uint32_t num = 0;
+
+	camera_application::Picture msg;
+	msg.imageNumber = num++;
+	msg.timestamp = timestamp;
+	msg.image = data;
+
+	this->picturePublisher.publish(msg);
 }
 
 bool Communicator::handleInitializeCameraService(
