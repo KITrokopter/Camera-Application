@@ -1,35 +1,65 @@
 #include "libfreenect.hpp"
 #include "ImageAnalyzer.hpp"
 
+#include <opencv/cv.h>
 
-ImageAnalyzer::ImageAnalyzer(CvKinect* imageSource) {
+
+ImageAnalyzer::ImageAnalyzer(CvKinect* imageSource)
+{
 	this->imageSource = imageSource;
-	imageSource->setImageReceiver(this);
+	imageSource->addImageReceiver(this);
 	lastImage = 0;
+	videoStarted = false;
 }
 
-void ImageAnalyzer::start() {
+void ImageAnalyzer::start()
+{
 	imageSource->startVideo();
+	videoStarted = true;
 }
 
-void ImageAnalyzer::stop() {
+void ImageAnalyzer::stop()
+{
 	imageSource->stopVideo();
+	videoStarted = false;
+}
+
+bool ImageAnalyzer::isStarted()
+{
+	return videoStarted;
 }
 
 // Returns a shallow copy of the last image. The image matrix is the same as the image matrix of the internal image.
-cv::Mat* ImageAnalyzer::getImage() {
+cv::Mat* ImageAnalyzer::getImage()
+{
 	if (lastImage == 0) {
 		return 0;
 	} else {
-		return new cv::Mat(*lastImage);
+		imageMutex.lock();
+		cv::Mat* result = new cv::Mat(*lastImage);
+		imageMutex.unlock();
+		
+		return result;
 	}
 }
 
-void ImageAnalyzer::receiveImage(cv::Mat* image) {
+void ImageAnalyzer::receiveImage(cv::Mat* image)
+{
+	imageMutex.lock();
+	
+	if (lastImage != 0) {
+		delete lastImage;
+	}
+	
 	lastImage = image;
+	
+	imageMutex.unlock();
 }
 
-ImageAnalyzer::~ImageAnalyzer() {
+ImageAnalyzer::~ImageAnalyzer()
+{
+	imageSource->removeImageReceiver(this);
+	
 	if (lastImage != 0) {
 		delete lastImage;
 	}

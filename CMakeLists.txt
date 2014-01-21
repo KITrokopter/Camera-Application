@@ -108,6 +108,7 @@ add_executable(Camera-Application_node
   src/CvKinect.cpp
   src/Mutex.cpp
   src/ImageAnalyzer.cpp
+  src/CvImageProcessor.cpp
   src/Communicator.cpp
 )
 
@@ -120,8 +121,13 @@ target_link_libraries(Camera-Application_node ${catkin_LIBRARIES}
   libopencv_core.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so
 )
 
-add_executable(TakePictureTest test/TestTakePicture.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp)
-target_link_libraries(TakePictureTest ${catkin_LIBRARIES}
+add_executable(TestTakePicture test/TestTakePicture.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp)
+target_link_libraries(TestTakePicture ${catkin_LIBRARIES}
+  libopencv_core.so libopencv_highgui.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so
+)
+
+add_executable(TestCalibration test/TestCalibration.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp src/CvImageProcessor.cpp)
+target_link_libraries(TestCalibration ${catkin_LIBRARIES}
   libopencv_core.so libopencv_highgui.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so
 )
 
