@@ -1,7 +1,9 @@
 
 #include "Communicator.hpp"
 
-Communicator::Communicator(ImageAnalyzer *analyzer) : analyzer(analyzer)
+Communicator::Communicator(ImageAnalyzer *analyzer):
+	analyzer(analyzer),
+	initialized(false)
 {
 	ros::NodeHandle n;
 
@@ -17,7 +19,15 @@ bool Communicator::handleInitializeCameraService(
 		camera_application::InitializeCameraService::Response &res)
 {
 	ROS_INFO("Received initialize_camera message.");
-	res.error = 0;
+	if (this->initialized) {
+		ROS_ERROR("initialize_camera called twice, ignoring.");
+		res.error = 1;
+	} else {
+		this->initialized = true;
+		this->hsvColorRanges = req.hsvColorRanges;
+		this->quadCopterIds = req.quadCopterIds;
+		res.error = 0;
+	}
 	return true;
 }
 

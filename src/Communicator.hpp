@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "ros/ros.h"
 
 #include "ImageAnalyzer.hpp"
@@ -33,4 +35,9 @@ class Communicator {
 		ros::ServiceServer initializeCameraService;
 		ros::Subscriber pictureSendingActivationSubscriber;
 		ImageAnalyzer *analyzer;
+
+		// Initialization data
+		bool initialized;
+		std::vector<uint32_t> hsvColorRanges;
+		std::vector<uint32_t> quadCopterIds;
 };
