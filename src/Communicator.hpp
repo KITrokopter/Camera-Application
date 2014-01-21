@@ -2,6 +2,8 @@
 
 #include "ros/ros.h"
 
+#include "ImageAnalyzer.hpp"
+
 // Services
 #include "camera_application/InitializeCameraService.h"
 
@@ -15,7 +17,7 @@
  */
 class Communicator {
 	public:
-		Communicator();
+		Communicator(ImageAnalyzer *analyzer);
 
 	protected:
 		// Services
@@ -30,4 +32,5 @@ class Communicator {
 	private:
 		ros::ServiceServer initializeCameraService;
 		ros::Subscriber pictureSendingActivationSubscriber;
+		ImageAnalyzer *analyzer;
 };

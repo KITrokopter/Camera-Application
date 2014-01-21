@@ -1,7 +1,7 @@
 
 #include "Communicator.hpp"
 
-Communicator::Communicator()
+Communicator::Communicator(ImageAnalyzer *analyzer) : analyzer(analyzer)
 {
 	ros::NodeHandle n;
 
@@ -25,4 +25,10 @@ void Communicator::handlePictureSendingActivation(
 		const camera_application::PictureSendingActivation::Ptr &msg)
 {
 	ROS_INFO("Received picture_sending_activation message. Setting %d to %d.", msg->ID, msg->active);
+	if (analyzer->isStarted() && !msg->active) {
+		analyzer->stop();
+	}
+	else if (!analyzer->isStarted() && msg->active) {
+		analyzer->start();
+	}
 }

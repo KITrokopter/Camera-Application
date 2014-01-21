@@ -96,7 +96,7 @@ int main(int argc, char** argv)
 	ImageAnalyzer analyzer(&device);
 	
 	// Do ROS stuff.
-	Communicator comm;
+	Communicator comm(&analyzer);
 	ROS_INFO("Initialized.");
 	ros::spin();
 	
