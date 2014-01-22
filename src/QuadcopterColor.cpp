@@ -7,7 +7,7 @@ QuadcopterColor::QuadcopterColor(cv::Scalar minColor, cv::Scalar maxColor, int i
 	this->id = id;
 }
 
-QuadcopterColor::QuadcopterColor(int minHue, int maxHue, int minSaturation, int maxSaturation, int minValue, int maxValue, int id)
+QuadcopterColor::QuadcopterColor(uint8_t minHue, uint8_t maxHue, uint8_t minSaturation, uint8_t maxSaturation, uint8_t minValue, uint8_t maxValue, int id)
 {
 	this->minColor = cv::Scalar(minHue, minSaturation, minValue);
 	this->maxColor = cv::Scalar(maxHue, maxSaturation, maxValue);
