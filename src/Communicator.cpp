@@ -3,7 +3,8 @@
 
 #include <ctime>
 
-Communicator::Communicator(ImageAnalyzer *analyzer):
+Communicator::Communicator(CvKinect *device, ImageAnalyzer *analyzer):
+	device(device),
 	analyzer(analyzer),
 	initialized(false)
 {
@@ -17,6 +18,22 @@ Communicator::Communicator(ImageAnalyzer *analyzer):
 
 	// Publishers
 	this->picturePublisher = n.advertise<camera_application::Picture>("picture", 1);
+
+	// Listen to the camera.
+	device->addImageReceiver(this);
+}
+
+void Communicator::receiveImage(cv::Mat* image, long int time)
+{
+	unsigned int notnull = 0;
+	camera_application::Picture::_image_type data;
+	for (size_t i = 0; i < (640 * 480); i++) {
+		if (image->data[i]) notnull++;
+		data[i] = image->data[i];
+	}
+	ROS_INFO("notnull: %u", notnull);
+	this->sendPicture(data, (uint64_t)time);
+	delete image;
 }
 
 void Communicator::sendPicture(camera_application::Picture::_image_type &data, uint64_t timestamp)
@@ -24,6 +41,7 @@ void Communicator::sendPicture(camera_application::Picture::_image_type &data, u
 	static uint32_t num = 0;
 
 	camera_application::Picture msg;
+	msg.ID = this->id;
 	msg.imageNumber = num++;
 	msg.timestamp = timestamp;
 	msg.image = data;
@@ -55,11 +73,11 @@ void Communicator::handlePictureSendingActivation(
 	if (msg->ID != this->id)
 		return;
 	if (analyzer->isStarted() && !msg->active) {
-		ROS_INFO("Stopping analyzer.");
+		ROS_INFO("Stopping image analyzer.");
 		analyzer->stop();
 	}
 	else if (!analyzer->isStarted() && msg->active) {
-		ROS_INFO("Starting analyzer.");
+		ROS_INFO("Starting image analyzer.");
 		analyzer->start();
 	}
 }

@@ -5,6 +5,7 @@
 #include "ros/ros.h"
 
 #include "ImageAnalyzer.hpp"
+#include "CvKinect.hpp"
 
 // Services
 #include "camera_application/InitializeCameraService.h"
@@ -20,10 +21,11 @@
  *
  * Provides communication with ROS.
  */
-class Communicator {
+class Communicator : public IImageReceiver {
 	public:
-		Communicator(ImageAnalyzer *analyzer);
+		Communicator(CvKinect *device, ImageAnalyzer *analyzer);
 
+		void receiveImage(cv::Mat* image, long int time);
 		void sendPicture(camera_application::Picture::_image_type &data, uint64_t timestamp);
 
 	protected:
@@ -40,6 +42,8 @@ class Communicator {
 		ros::ServiceServer initializeCameraService;
 		ros::Subscriber pictureSendingActivationSubscriber;
 		ros::Publisher picturePublisher;
+
+		CvKinect *device;
 		ImageAnalyzer *analyzer;
 
 		// Initialization data

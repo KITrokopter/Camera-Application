@@ -95,7 +95,7 @@ int main(int argc, char** argv)
 	CvImageProcessor* analyzer = new CvImageProcessor(&device, 0); // TODO second argument should not be null
 	
 	// Do ROS stuff.
-	Communicator comm(analyzer);
+	Communicator comm(&device, analyzer);
 	ROS_INFO("Initialized.");
 	ros::spin();
 	
