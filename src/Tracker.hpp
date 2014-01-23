@@ -18,6 +18,7 @@ private:
 	// Tracking
 	volatile QuadcopterColor* qc;
 	volatile cv::Mat* image;
+	volatile long int imageTime;
 	volatile bool imageDirty;
 	Mutex imageMutex;
 	ITrackerDataReceiver* dataReceiver;
@@ -39,7 +40,7 @@ public:
 	 * Creates a copy of the given image and uses it for tracking as soon as it can.
 	 * The given image must already be undistorted.
 	 */
-	void setNextImage(cv::Mat* image);
+	void setNextImage(cv::Mat* image, long int time);
 	
 	QuadcopterColor* getQuadcopterColor();
 };

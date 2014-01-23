@@ -8,8 +8,9 @@
 #include "ImageAnalyzer.hpp"
 #include "Tracker.hpp"
 #include "ITrackerDataReceiver.hpp"
+#include "IImageReceiver.hpp"
 
-class CvImageProcessor
+class CvImageProcessor : IImageReceiver
 {
 private:
 	ImageAnalyzer* imageAnalyzer;
@@ -40,6 +41,7 @@ private:
 	std::vector<cv::Point2f>* createImagePoints();
 public:
 	CvImageProcessor(ImageAnalyzer* imageAnalyzer, ITrackerDataReceiver* dataReceiver);
+	void receiveImage(cv::Mat* image, long int time);
 	
 	void setIntrinsicsMatrix(cv::Mat* intrinsicsMatrix);
 	void setDistortionCoefficients(cv::Mat* distortionCoefficients);

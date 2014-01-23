@@ -57,7 +57,7 @@ void Tracker::join()
 	}
 }
 	
-void Tracker::setNextImage(cv::Mat* image)
+void Tracker::setNextImage(cv::Mat* image, long int time)
 {
 	imageMutex.lock();
 	
@@ -66,6 +66,7 @@ void Tracker::setNextImage(cv::Mat* image)
 	}
 	
 	this->image = new cv::Mat(*image);
+	imageTime = time;
 	imageDirty = true;
 	
 	imageMutex.unlock();
@@ -94,6 +95,7 @@ void Tracker::executeTracker()
 		imageMutex.lock();
 		cv::Mat* image = (cv::Mat*) this->image;
 		image = new cv::Mat(*image);
+		long int time = this->imageTime;
 		imageMutex.unlock();
 		
 		#ifdef QC_DEBUG_TRACKER

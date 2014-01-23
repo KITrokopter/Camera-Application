@@ -120,7 +120,7 @@ void CvImageProcessor::calibrateCamera()
 			
 			// Notify listener about new image.
 			if (calibrationImageReceiver != 0) {
-				calibrationImageReceiver->receiveImage(new cv::Mat(*image));
+				calibrationImageReceiver->receiveImage(new cv::Mat(*image), -1);
 			}
 			
 			successfulImageAmount++;

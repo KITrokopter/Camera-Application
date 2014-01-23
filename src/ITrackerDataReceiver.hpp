@@ -4,7 +4,7 @@
 class ITrackerDataReceiver
 {
 public:
-	virtual void receiveTrackingData(cv::Scalar direction, int id) = 0;
+	virtual void receiveTrackingData(cv::Scalar direction, int id, long int time) = 0;
 };
 
 #endif // ITRACKER_DATA_RECEIVER_HPP

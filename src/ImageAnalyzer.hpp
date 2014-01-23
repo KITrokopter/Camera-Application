@@ -10,6 +10,7 @@ class ImageAnalyzer : IImageReceiver
 {
 private:
 	cv::Mat* lastImage;
+	long int lastImageTime;
 	CvKinect* imageSource;
 	Mutex imageMutex;
 	bool videoStarted;
@@ -20,7 +21,7 @@ public:
 	void stop();
 	bool isStarted();
 	cv::Mat* getImage();
-	void receiveImage(cv::Mat* image);
+	void receiveImage(cv::Mat* image, long int time);
 	
 	~ImageAnalyzer();
 };
