@@ -52,11 +52,14 @@ bool Communicator::handleInitializeCameraService(
 void Communicator::handlePictureSendingActivation(
 		const camera_application::PictureSendingActivation::Ptr &msg)
 {
-	ROS_INFO("Received picture_sending_activation message. Setting %d to %d.", msg->ID, msg->active);
+	if (msg->ID != this->id)
+		return;
 	if (analyzer->isStarted() && !msg->active) {
+		ROS_INFO("Stopping analyzer.");
 		analyzer->stop();
 	}
 	else if (!analyzer->isStarted() && msg->active) {
+		ROS_INFO("Starting analyzer.");
 		analyzer->start();
 	}
 }
