@@ -1,4 +1,4 @@
-//#include <opencv2/core/mat.hpp>
+#include <opencv2/core/core.hpp>
 #include <iostream>
 #include <unistd.h>
 #include <sys/types.h>
@@ -9,11 +9,9 @@
 
 #include <ros/ros.h>
 
-#include "ros/ros.h"
-
 #include "libfreenect.hpp"
 #include "CvKinect.hpp"
-#include "ImageAnalyzer.hpp"
+#include "CvImageProcessor.hpp"
 #include "Communicator.hpp"
 
 bool startsWith(const char *prefix, const char *str)
@@ -23,6 +21,7 @@ bool startsWith(const char *prefix, const char *str)
 	return lenStr < lenPrefix ? false : strncmp(prefix, str, lenPrefix) == 0;
 }
 
+// Gets the ip address of the machine
 char* getIpAddress()
 {
 	struct ifaddrs * ifAddrStruct = NULL;
@@ -93,10 +92,10 @@ int main(int argc, char** argv)
 	
 	Freenect::Freenect freenect;
 	CvKinect& device = freenect.createDevice<CvKinect>(0);
-	ImageAnalyzer analyzer(&device);
+	CvImageProcessor* analyzer = new CvImageProcessor(&device, 0); // TODO second argument should not be null
 	
 	// Do ROS stuff.
-	Communicator comm(&analyzer);
+	Communicator comm(analyzer);
 	ROS_INFO("Initialized.");
 	ros::spin();
 	

@@ -1,6 +1,7 @@
 #include "libfreenect.hpp"
 #include "Mutex.hpp"
 #include "CvKinect.hpp"
+#include "profiling.hpp"
 
 #include <iostream>
 
@@ -24,10 +25,12 @@ void CvKinect::VideoCallback(void* _rgb, uint32_t timestamp)
 	m_new_rgb_frame = true;
 	m_rgb_mutex.unlock();
 	
+	long int time = getNanoTime();
+
 	for (std::vector<IImageReceiver*>::iterator it = imageReceivers.begin(); it != imageReceivers.end(); it++) {
 		cv::Mat* image = new cv::Mat(cv::Size(640,480), CV_8UC3, cv::Scalar(0));
 		getVideo(*image);
-		(*it)->receiveImage(image);
+		(*it)->receiveImage(image, time);
 	}
 }
 
