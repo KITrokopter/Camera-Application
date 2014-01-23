@@ -7,13 +7,13 @@
 }
 
 @test "querying initialize_camera with empty parameters returns no error" {
-    run rosservice call /initialize_camera '{header: auto, hsvColorRanges: [], quadCopterIds: []}'
+    run rosservice call /initialize_camera '{header: auto, ID: 42, hsvColorRanges: [], quadCopterIds: []}'
     [ $status -eq 0 ]
     [ $output = "error: 0" ]
 }
 
 @test "querying initialize_camera a second time returns an error" {
-    run rosservice call /initialize_camera '{header: auto, hsvColorRanges: [], quadCopterIds: []}'
+    run rosservice call /initialize_camera '{header: auto,  ID: 42,hsvColorRanges: [], quadCopterIds: []}'
     [ $status -eq 0 ]
     [ $output = "error: 1" ]
 }

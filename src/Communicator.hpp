@@ -44,6 +44,7 @@ class Communicator {
 
 		// Initialization data
 		bool initialized;
+		uint32_t id;
 		std::vector<uint32_t> hsvColorRanges;
 		std::vector<uint32_t> quadCopterIds;
 };

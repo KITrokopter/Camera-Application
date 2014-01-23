@@ -35,12 +35,13 @@ bool Communicator::handleInitializeCameraService(
 		camera_application::InitializeCameraService::Request &req,
 		camera_application::InitializeCameraService::Response &res)
 {
-	ROS_INFO("Received initialize_camera message.");
 	if (this->initialized) {
 		ROS_ERROR("initialize_camera called twice, ignoring.");
 		res.error = 1;
 	} else {
+		ROS_INFO("Initializing camera %u.", req.ID);
 		this->initialized = true;
+		this->id = req.ID;
 		this->hsvColorRanges = req.hsvColorRanges;
 		this->quadCopterIds = req.quadCopterIds;
 		res.error = 0;
