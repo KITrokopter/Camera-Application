@@ -11,7 +11,7 @@
 //#define QC_REGISTER
 
 // Use this for debugging the object recognition.
-#define QC_DEBUG_TRACKER
+//#define QC_DEBUG_TRACKER
 
 #ifdef QC_DEBUG_TRACKER
 #include <opencv2/highgui/highgui.hpp>
@@ -105,6 +105,7 @@ void Tracker::executeTracker()
 		cv::Mat* image = (cv::Mat*) this->image;
 		image = new cv::Mat(*image);
 		long int time = this->imageTime;
+		imageDirty = false;
 		imageMutex.unlock();
 		
 		#ifdef QC_DEBUG_TRACKER
@@ -143,22 +144,24 @@ void Tracker::executeTracker()
 		cvReleaseTracks(tracks);
 		#endif
 		
-		// Find biggest blob
-		cvb::CvLabel largestBlob =  cvLargestBlob(blobs);
-		CvPoint2D64f center = blobs.find(largestBlob)->second->centroid;
-		double x = center.x;
-		double y = center.y;
-		
-		// Set (0, 0) to center.
-		x -= 320;
-		y = 240 - y;
-		ROS_DEBUG("Center: %lf/%lf", x, y);
-		
-		// Apply scaling
-		x *= horizontalScalingFactor;
-		y *= verticalScalingFactor;
-		
-		dataReceiver->receiveTrackingData(cv::Scalar(x, y, 1.0), ((QuadcopterColor*) qc)->getId(), time);
+		if (blobs.size() != 0) {
+			// Find biggest blob
+			cvb::CvLabel largestBlob =  cvLargestBlob(blobs);
+			CvPoint2D64f center = blobs.find(largestBlob)->second->centroid;
+			double x = center.x;
+			double y = center.y;
+			
+			// Set (0, 0) to center.
+			x -= 320;
+			y = 240 - y;
+			ROS_DEBUG("Center: %lf/%lf", x, y);
+			
+			// Apply scaling
+			x *= horizontalScalingFactor;
+			y *= verticalScalingFactor;
+			
+			dataReceiver->receiveTrackingData(cv::Scalar(x, y, 1.0), ((QuadcopterColor*) qc)->getId(), time);
+		}
 		
 		// Free cvb stuff. TODO probably incomplete.
 		cvReleaseBlobs(blobs);
