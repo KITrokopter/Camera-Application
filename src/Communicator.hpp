@@ -4,7 +4,7 @@
 
 #include "ros/ros.h"
 
-#include "ImageAnalyzer.hpp"
+#include "CvImageProcessor.hpp"
 #include "CvKinect.hpp"
 
 // Services
@@ -23,7 +23,7 @@
  */
 class Communicator : public IImageReceiver {
 	public:
-		Communicator(CvKinect *device, ImageAnalyzer *analyzer);
+		Communicator(CvKinect *device, CvImageProcessor *analyzer);
 
 		void receiveImage(cv::Mat* image, long int time);
 		void sendPicture(camera_application::Picture::_image_type &data, uint64_t timestamp);
@@ -44,7 +44,7 @@ class Communicator : public IImageReceiver {
 		ros::Publisher picturePublisher;
 
 		CvKinect *device;
-		ImageAnalyzer *analyzer;
+		CvImageProcessor *analyzer;
 
 		// Initialization data
 		bool initialized;

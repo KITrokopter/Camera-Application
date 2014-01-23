@@ -3,7 +3,7 @@
 
 #include <ctime>
 
-Communicator::Communicator(CvKinect *device, ImageAnalyzer *analyzer):
+Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
 	device(device),
 	analyzer(analyzer),
 	initialized(false)
