@@ -44,12 +44,12 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * uncomment the generate_messages entry below
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
-## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+# Generate messages in the 'msg' folder
+add_message_files(
+  FILES
+  Picture.msg
+  PictureSendingActivation.msg
+)
 
 # Generate services in the 'srv' folder
 add_service_files(
@@ -104,7 +104,17 @@ include_directories(
 #)
 
 ## Declare a cpp executable
-add_executable(Camera-Application_node src/main.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp src/CvImageProcessor.cpp)
+add_executable(Camera-Application_node
+  src/main.cpp
+  src/CvKinect.cpp
+  src/Mutex.cpp
+  src/ImageAnalyzer.cpp
+  src/CvImageProcessor.cpp
+  src/QuadcopterColor.cpp
+  src/Tracker.cpp
+  src/profiling.cpp
+  src/Communicator.cpp
+)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -112,17 +122,27 @@ add_executable(Camera-Application_node src/main.cpp src/CvKinect.cpp src/Mutex.c
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(Camera-Application_node ${catkin_LIBRARIES}
-  libopencv_core.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so
+  libopencv_core.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so libcvblob.so libopencv_highgui.so
 )
 
-add_executable(TestTakePicture test/TestTakePicture.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp)
+add_executable(TestTakePicture test/TestTakePicture.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp src/profiling.cpp src/CvImageProcessor.cpp src/QuadcopterColor.cpp src/Tracker.cpp)
 target_link_libraries(TestTakePicture ${catkin_LIBRARIES}
-  libopencv_core.so libopencv_highgui.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so
+  libopencv_core.so libopencv_highgui.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so libcvblob.so
 )
 
-add_executable(TestCalibration test/TestCalibration.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp src/CvImageProcessor.cpp)
+add_executable(TestCalibration test/TestCalibration.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp src/CvImageProcessor.cpp src/profiling.cpp src/QuadcopterColor.cpp src/Tracker.cpp)
 target_link_libraries(TestCalibration ${catkin_LIBRARIES}
-  libopencv_core.so libopencv_highgui.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so
+  libopencv_core.so libopencv_highgui.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so libcvblob.so
+)
+
+add_executable(TestTracker test/TestTracker.cpp src/Tracker.cpp src/QuadcopterColor.cpp src/Mutex.cpp src/profiling.cpp src/ImageAnalyzer.cpp src/CvImageProcessor.cpp src/CvKinect.cpp)
+target_link_libraries(TestTracker ${catkin_LIBRARIES}
+  libopencv_core.so libopencv_imgproc.so libopencv_highgui.so libfreenect.so libopencv_calib3d.so libcvblob.so
+)
+
+add_executable(TestTracking test/TestTracking.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp src/CvImageProcessor.cpp src/QuadcopterColor.cpp src/Tracker.cpp src/profiling.cpp)
+target_link_libraries(TestTracking ${catkin_LIBRARIES}
+  libopencv_core.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so libcvblob.so libopencv_highgui.so
 )
 
 #############

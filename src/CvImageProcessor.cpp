@@ -1,15 +1,17 @@
 #include "CvImageProcessor.hpp"
-#include <opencv/cv.h>
+#include <opencv2/calib3d/calib3d.hpp>
 #include <ros/console.h>
 #include <iostream>
 
-CvImageProcessor::CvImageProcessor(ImageAnalyzer* imageAnalyzer)
+CvImageProcessor::CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* dataReceiver)
+		: ImageAnalyzer::ImageAnalyzer(imageSource)
 {
 	this->intrinsicsMatrix = 0;
 	this->distortionCoefficients = 0;
 	this->calibrationThread = 0;
-	this->imageAnalyzer = imageAnalyzer;
+	this->dataReceiver = dataReceiver;
 	this->calibrationImageReceiver = 0;
+	this->isTracking = false;
 }
 
 void CvImageProcessor::setIntrinsicsMatrix(cv::Mat* intrinsicsMatrix)
@@ -18,7 +20,11 @@ void CvImageProcessor::setIntrinsicsMatrix(cv::Mat* intrinsicsMatrix)
 		delete this->intrinsicsMatrix;
 	}
 	
-	this->intrinsicsMatrix = intrinsicsMatrix;
+	if (intrinsicsMatrix != 0) {
+		this->intrinsicsMatrix = new cv::Mat(*intrinsicsMatrix);
+	} else {
+		this->intrinsicsMatrix = 0;
+	}
 }
 
 void CvImageProcessor::setDistortionCoefficients(cv::Mat* distortionCoefficients)
@@ -27,7 +33,11 @@ void CvImageProcessor::setDistortionCoefficients(cv::Mat* distortionCoefficients
 		delete this->distortionCoefficients;
 	}
 	
-	this->distortionCoefficients = distortionCoefficients;
+	if (distortionCoefficients != 0) {
+		this->distortionCoefficients = new cv::Mat(*distortionCoefficients);
+	} else {
+		this->distortionCoefficients = 0;
+	}
 }
 
 std::vector<cv::Point3f>* CvImageProcessor::createObjectPoints()
@@ -60,10 +70,10 @@ std::vector<cv::Point2f>* CvImageProcessor::createImagePoints()
 
 void CvImageProcessor::calibrateCamera()
 {
-	bool videoStarted = imageAnalyzer->isStarted();
+	bool videoStarted = isStarted();
 	
 	if (!videoStarted) {
-		imageAnalyzer->start();
+		start();
 	}
 	
 	cv::Size boardSize(boardWidth, boardHeight);
@@ -76,10 +86,10 @@ void CvImageProcessor::calibrateCamera()
 	cv::Mat distortionCoefficients = cv::Mat::zeros(5, 1, CV_32F);
 	
 	// Fill object points with data about the chessboard
-	std::vector<cv::Point3f> objectPoints = *createObjectPoints();
+	std::vector<cv::Point3f>* objectPoints = createObjectPoints();
 	
 	for (int i = 0; i < imageAmount; i++) {
-		allObjectPoints.push_back(objectPoints);
+		allObjectPoints.push_back(*objectPoints);
 	}
 	
 	// temporary create custom image points used for testing
@@ -90,12 +100,12 @@ void CvImageProcessor::calibrateCamera()
 	int successfulImageAmount = 0;
 	
 	// Loop until we got enough images for calibration.
-	while (successfulImageAmount < imageAmount) {
+	while (successfulImageAmount < imageAmount && !abortCalibrationFlag) {
 		// Wait a bit to give the user time to move the chessboard.
 		usleep(1000 * imageDelay);
 		
 		// Get image.
-		cv::Mat* image = imageAnalyzer->getImage();
+		cv::Mat* image = getImage();
 		
 		// Find chessboard corners.
 		std::vector<cv::Point2f> corners;
@@ -119,7 +129,7 @@ void CvImageProcessor::calibrateCamera()
 			
 			// Notify listener about new image.
 			if (calibrationImageReceiver != 0) {
-				calibrationImageReceiver->receiveImage(new cv::Mat(*image));
+				calibrationImageReceiver->receiveImage(new cv::Mat(*image), -1);
 			}
 			
 			successfulImageAmount++;
@@ -136,19 +146,18 @@ void CvImageProcessor::calibrateCamera()
 	
 	// Calibrate camera.
 	// Use CV_CALIB_FIX_K3, since k3 is only really useful for fisheye lenses.
-	calibrationError = cv::calibrateCamera(allObjectPoints, imagePoints, cv::Size(CvKinect::KINECT_IMAGE_WIDTH, CvKinect::KINECT_IMAGE_HEIGHT), intrinsicsMatrix, distortionCoefficients, rvecs, tvecs, CV_CALIB_FIX_K3, cv::TermCriteria(cv::TermCriteria::COUNT | cv::TermCriteria::EPS, 30, DBL_EPSILON));
+	calibrationError = cv::calibrateCamera(allObjectPoints, imagePoints, cv::Size(CvKinect::KINECT_IMAGE_WIDTH, CvKinect::KINECT_IMAGE_HEIGHT), intrinsicsMatrix, distortionCoefficients, rvecs, tvecs, 0/*CV_CALIB_FIX_K3*/, cv::TermCriteria(cv::TermCriteria::COUNT | cv::TermCriteria::EPS, 30, DBL_EPSILON));
 	
 	setIntrinsicsMatrix(&intrinsicsMatrix);
 	setDistortionCoefficients(&distortionCoefficients);
 	std::cout << "Calibration successful" << std::endl;
 	
-	
 	// Free object description
-	//delete &objectPoints;
+	delete objectPoints;
 	
 	// If video wasn't started before, stop it.
 	if (!videoStarted) {
-		imageAnalyzer->stop();
+		stop();
 	}
 	
 	calibrationImageReceiver = 0;
@@ -165,13 +174,14 @@ void CvImageProcessor::clearCalibrationImages()
 void CvImageProcessor::waitForCalibration()
 {
 	calibrationThread->join();
-	free(calibrationThread);
+	delete calibrationThread;
 	calibrationThread = 0;
 }
 
 cv::Mat* CvImageProcessor::undistortImage(cv::Mat* inputImage) {
 	cv::Mat* undistorted = new cv::Mat(inputImage->size(), inputImage->type());
 	cv::undistort(*inputImage, *undistorted, *intrinsicsMatrix, *distortionCoefficients);
+	return undistorted;
 }
 
 void CvImageProcessor::startCalibration(int imageAmount, int imageDelay, int boardWidth, int boardHeight, float boardRectangleWidth, float boardRectangleHeight, IImageReceiver* calibrationImageReceiver)
@@ -183,10 +193,93 @@ void CvImageProcessor::startCalibration(int imageAmount, int imageDelay, int boa
 	this->boardRectangleWidth = boardRectangleWidth;
 	this->boardRectangleHeight = boardRectangleHeight;
 	this->calibrationImageReceiver = calibrationImageReceiver;
-	abortCalibration = false;
+	abortCalibrationFlag = false;
 	
 	setIntrinsicsMatrix(0);
 	setDistortionCoefficients(0);
 	
 	calibrationThread = new boost::thread(boost::bind(&CvImageProcessor::calibrateCamera, this));
+}
+
+void CvImageProcessor::processImage(cv::Mat* image, long int time)
+{
+	if (isTracking) {
+		ROS_DEBUG("Processing image");
+		
+		cv::Mat* undistorted = undistortImage(image);
+		
+		ROS_DEBUG("Image successfully undistorted");
+		
+		for (std::vector<Tracker*>::iterator it = trackers.begin(); it != trackers.end(); it++) {
+			(*it)->setNextImage(undistorted, time);
+		}
+		
+		ROS_DEBUG("Processing image shared between %ld threads", trackers.size());
+	}
+	
+	delete image;
+}
+
+void CvImageProcessor::startTracking()
+{
+	for (std::vector<Tracker*>::iterator it = trackers.begin(); it != trackers.end(); it++) {
+		(*it)->start();
+	}
+	
+	isTracking = true;
+	
+	ROS_DEBUG("Tracking started");
+}
+
+void CvImageProcessor::stopTracking()
+{
+	isTracking = false;
+	
+	for (std::vector<Tracker*>::iterator it = trackers.begin(); it != trackers.end(); it++) {
+		(*it)->stop();
+	}
+	
+	for (std::vector<Tracker*>::iterator it = trackers.begin(); it != trackers.end(); it++) {
+		(*it)->join();
+	}
+}
+
+void CvImageProcessor::addQuadcopter(QuadcopterColor* qc)
+{
+	Tracker* tracker = new Tracker(dataReceiver, qc);
+	trackers.push_back(tracker);
+}
+
+void CvImageProcessor::removeQuadcopter(int id)
+{
+	for (std::vector<Tracker*>::iterator it = trackers.begin(); it != trackers.end(); it++) {
+		if ((*it)->getQuadcopterColor()->getId() == id) {
+			delete *it;
+			trackers.erase(it);
+		}
+	}
+}
+
+cv::Mat* CvImageProcessor::getIntrinsicsMatrix()
+{
+	return new cv::Mat(*intrinsicsMatrix);
+}
+
+cv::Mat* CvImageProcessor::getDistortionCoefficients()
+{
+	return new cv::Mat(*distortionCoefficients);
+}
+
+void CvImageProcessor::abortCalibration()
+{
+	abortCalibrationFlag = true;
+}
+
+bool CvImageProcessor::isCalibrated()
+{
+	return intrinsicsMatrix != 0 && distortionCoefficients != 0;
+}
+
+CvImageProcessor::~CvImageProcessor()
+{
 }

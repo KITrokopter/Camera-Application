@@ -1,5 +1,5 @@
 #include <opencv2/highgui/highgui.hpp>
-//#include <opencv2/core/mat.hpp>
+#include <opencv2/core/core.hpp>
 #include <ros/console.h>
 #include <ros/init.h>
 #include <iostream>
@@ -7,6 +7,7 @@
 #include "libfreenect.hpp"
 #include "../src/CvKinect.hpp"
 #include "../src/ImageAnalyzer.hpp"
+#include "../src/CvImageProcessor.hpp"
 
 int main(int argc, char** argv) {
 	std::cout << "Starting ROS Node" << std::endl;
@@ -16,7 +17,7 @@ int main(int argc, char** argv) {
 	
 	Freenect::Freenect freenect;
 	CvKinect& device = freenect.createDevice<CvKinect>(0);
-	ImageAnalyzer analyzer(&device);
+	CvImageProcessor analyzer(&device, 0);
 	analyzer.start();
 	
 	std::cout << "ImageAnalyzer started" << std::endl;

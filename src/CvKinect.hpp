@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <opencv2/core/core.hpp>
-#include <opencv2/core/mat.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <vector>
 
@@ -13,8 +12,6 @@
 
 class CvKinect : public Freenect::FreenectDevice
 {
-
-
 	public:
 		static const int KINECT_IMAGE_WIDTH = 640;
 		static const int KINECT_IMAGE_HEIGHT = 480;

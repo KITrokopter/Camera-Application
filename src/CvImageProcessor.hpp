@@ -3,15 +3,19 @@
 
 #include <vector>
 #include <opencv2/core/core.hpp>
-#include <opencv2/core/mat.hpp>
 #include <boost/thread.hpp>
 
 #include "ImageAnalyzer.hpp"
+#include "Tracker.hpp"
+#include "ITrackerDataReceiver.hpp"
+#include "IImageReceiver.hpp"
+#include "CvKinect.hpp"
 
-class CvImageProcessor {
+class CvImageProcessor : public ImageAnalyzer
+{
 private:
-	ImageAnalyzer* imageAnalyzer;
 	IImageReceiver* calibrationImageReceiver;
+	ITrackerDataReceiver* dataReceiver;
 	
 	std::vector<cv::Scalar> colorRanges;
 	cv::Mat* intrinsicsMatrix;
@@ -20,7 +24,7 @@ private:
 	
 	// Camera calibration.
 	boost::thread* calibrationThread;
-	volatile bool abortCalibration;
+	volatile bool abortCalibrationFlag;
 	volatile double calibrationError;
 	int imageAmount;
 	int imageDelay;
@@ -29,13 +33,22 @@ private:
 	float boardRectangleWidth;
 	float boardRectangleHeight;
 	
+	// Tracking
+	std::vector<Tracker*> trackers;
+	bool isTracking;
+	
+	// Methods
 	std::vector<cv::Point3f>* createObjectPoints();
-	std::vector<cv::Point2f>* createImagePoints(); // TODO remove
+	std::vector<cv::Point2f>* createImagePoints();
+	
 public:
-	CvImageProcessor(ImageAnalyzer* imageAnalyzer);
+	CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* dataReceiver);
+	void processImage(cv::Mat* image, long int time);
 	
 	void setIntrinsicsMatrix(cv::Mat* intrinsicsMatrix);
 	void setDistortionCoefficients(cv::Mat* distortionCoefficients);
+	cv::Mat* getIntrinsicsMatrix();
+	cv::Mat* getDistortionCoefficients();
 	
 	// Camera calibration.
 	void calibrateCamera();
@@ -57,6 +70,17 @@ public:
 	 * boardRectangleHeight - The height of one board rectangle.
 	 */
 	void startCalibration(int imageAmount, int imageDelay, int boardWidth, int boardHeight, float boardRectangleWidth, float boardRectangleHeight, IImageReceiver* calibrationImageReceiver);
+	void abortCalibration();
+	bool isCalibrated();
+	
+	// Tracking
+	void addQuadcopter(QuadcopterColor* qc);
+	void removeQuadcopter(int id);
+	
+	void startTracking();
+	void stopTracking();
+	
+	~CvImageProcessor();
 };
 
 #endif // CV_IMAGE_PROCESSOR_HPP
