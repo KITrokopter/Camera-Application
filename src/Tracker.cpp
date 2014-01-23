@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <ros/console.h>
 #include "profiling.hpp"
 
 // Use this to use the register keyword in some places. Might make things faster, but I didn't test it.
@@ -151,15 +152,29 @@ cv::Mat* Tracker::createColorMapImage(cv::Mat* image) {
 	end = mapImage->data + mapImage->size().width * mapImage->size().height;
 	source = image->data;
 	
-	for (current = mapImage->data; current < end; ++current) {
-		//if (*source > maxHue || *source < minHue || *(++source) > maxSaturation || *source < minSaturation || *(++source) > maxValue || *(source++) < minValue) {
-		if (*source > maxHue || *source < minHue || *(++source) < minSaturation || *(++source) < minValue) {
-			*current = 0;
-		} else {
-			*current = 255;
-		}
+	if (minHue < maxHue) {
+		for (current = mapImage->data; current < end; ++current) {
+			//if (*source > maxHue || *source < minHue || *(++source) > maxSaturation || *source < minSaturation || *(++source) > maxValue || *(source++) < minValue) {
+			if (*source > maxHue || *source < minHue || *(++source) < minSaturation || *(++source) < minValue) {
+				*current = 0;
+			} else {
+				*current = 255;
+			}
 		
-		++source;
+			++source;
+		}
+	} else {
+		// Hue interval inverted here.
+		for (current = mapImage->data; current < end; ++current) {
+			//if (*source > maxHue || *source < minHue || *(++source) > maxSaturation || *source < minSaturation || *(++source) > maxValue || *(source++) < minValue) {
+			if (*source < maxHue || *source > minHue || *(++source) < minSaturation || *(++source) < minValue) {
+				*current = 0;
+			} else {
+				*current = 255;
+			}
+			
+			++source;
+		}
 	}
 	
 	STOP_CLOCK(maskImageClock, "Image masking took: ")

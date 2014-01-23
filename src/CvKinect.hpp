@@ -12,8 +12,6 @@
 
 class CvKinect : public Freenect::FreenectDevice
 {
-
-
 	public:
 		static const int KINECT_IMAGE_WIDTH = 640;
 		static const int KINECT_IMAGE_HEIGHT = 480;

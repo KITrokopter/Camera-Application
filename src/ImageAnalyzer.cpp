@@ -51,6 +51,8 @@ void ImageAnalyzer::receiveImage(cv::Mat* image, long int time)
 	lastImage = image;
 	lastImageTime = time;
 	
+	processImage(new cv::Mat(*image), time);
+	
 	imageMutex.unlock();
 }
 

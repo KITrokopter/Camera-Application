@@ -12,7 +12,7 @@ public:
 	TestTracker(){}
 	~TestTracker(){}
 	
-	void receiveTrackingData(cv::Scalar direction, int id)
+	void receiveTrackingData(cv::Scalar direction, int id, long int time)
 	{
 		std::cout << "Id: " << id << std::endl;
 		std::cout << "Direction: " << direction.val[0] << ", " << direction.val[1] << ", " << direction.val[2] << std::endl;
@@ -34,7 +34,7 @@ int main(void)
 		mat->data[i] = rand() % 256;
 	}
 	
-	tracker.setNextImage(mat);
+	tracker.setNextImage(mat, 5634);
 	
 	// Give tracker time to detect image before stopping.
 	usleep(1000000);

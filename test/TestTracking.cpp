@@ -45,22 +45,51 @@ TestCalibration::~TestCalibration() {
 	cv::destroyWindow("Calibration Test");
 }
 
+class TestTracker : public ITrackerDataReceiver
+{
+public:
+	TestTracker(){}
+	~TestTracker(){}
+		
+	void receiveTrackingData(cv::Scalar direction, int id, long int time)
+	{
+		std::cout << "Id: " << id << std::endl;
+		std::cout << "Direction: " << direction.val[0] << ", " << direction.val[1] << ", " << direction.val[2] << std::endl;
+	}
+};
+
 int main(int argc, char** argv)
 {
 	std::cout << "Starting ROS Node" << std::endl;
 	ros::init(argc, argv, "TestTakePicture");
+	
+	if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) {
+		ros::console::notifyLoggerLevelsChanged();
+	}
+	
 	ROS_DEBUG("Starting test");
 	std::cout << "ROS Node started" << std::endl;
 	
 	Freenect::Freenect freenect;
 	CvKinect& device = freenect.createDevice<CvKinect>(0);
-	CvImageProcessor processor(&device, 0);
+	TestTracker tt;
+	CvImageProcessor processor(&device, &tt);
 	TestCalibration tc;
 	
 	std::cout << "Starting calibration" << std::endl;
 	
+	processor.addQuadcopter(new QuadcopterColor(240, 20, 30, 255, 30, 255, 3));
+	
 	processor.startCalibration(3, 1000, 11, 8, 3, 3, &tc);
 	processor.waitForCalibration();
+	
+	processor.start();
+	processor.startTracking();
+	
+	usleep(1000 * 1000 * 10);
+	
+	processor.stopTracking();
+	processor.stop();
 	
 	std::cout << "Shutting down ROS Node" << std::endl;
 	ros::shutdown();

@@ -11,7 +11,7 @@
 
 #include "libfreenect.hpp"
 #include "CvKinect.hpp"
-#include "ImageAnalyzer.hpp"
+#include "CvImageProcessor.hpp"
 
 bool startsWith(const char *prefix, const char *str)
 {
@@ -91,7 +91,7 @@ int main(int argc, char** argv)
 	
 	Freenect::Freenect freenect;
 	CvKinect& device = freenect.createDevice<CvKinect>(0);
-	ImageAnalyzer analyzer(&device);
+	CvImageProcessor* analyzer = new CvImageProcessor(&device, 0); // TODO second argument should not be null
 	
 	// Do ROS stuff.
 	

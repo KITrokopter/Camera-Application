@@ -9,11 +9,11 @@
 #include "Tracker.hpp"
 #include "ITrackerDataReceiver.hpp"
 #include "IImageReceiver.hpp"
+#include "CvKinect.hpp"
 
-class CvImageProcessor : IImageReceiver
+class CvImageProcessor : public ImageAnalyzer
 {
 private:
-	ImageAnalyzer* imageAnalyzer;
 	IImageReceiver* calibrationImageReceiver;
 	ITrackerDataReceiver* dataReceiver;
 	
@@ -35,13 +35,15 @@ private:
 	
 	// Tracking
 	std::vector<Tracker*> trackers;
+	bool isTracking;
 	
 	// Methods
 	std::vector<cv::Point3f>* createObjectPoints();
 	std::vector<cv::Point2f>* createImagePoints();
+	
 public:
-	CvImageProcessor(ImageAnalyzer* imageAnalyzer, ITrackerDataReceiver* dataReceiver);
-	void receiveImage(cv::Mat* image, long int time);
+	CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* dataReceiver);
+	void processImage(cv::Mat* image, long int time);
 	
 	void setIntrinsicsMatrix(cv::Mat* intrinsicsMatrix);
 	void setDistortionCoefficients(cv::Mat* distortionCoefficients);
@@ -70,6 +72,11 @@ public:
 	// Tracking
 	void addQuadcopter(QuadcopterColor* qc);
 	void removeQuadcopter(int id);
+	
+	void startTracking();
+	void stopTracking();
+	
+	~CvImageProcessor();
 };
 
 #endif // CV_IMAGE_PROCESSOR_HPP
