@@ -24,7 +24,7 @@ private:
 	
 	// Camera calibration.
 	boost::thread* calibrationThread;
-	volatile bool abortCalibration;
+	volatile bool abortCalibrationFlag;
 	volatile double calibrationError;
 	int imageAmount;
 	int imageDelay;
@@ -47,6 +47,8 @@ public:
 	
 	void setIntrinsicsMatrix(cv::Mat* intrinsicsMatrix);
 	void setDistortionCoefficients(cv::Mat* distortionCoefficients);
+	cv::Mat* getIntrinsicsMatrix();
+	cv::Mat* getDistortionCoefficients();
 	
 	// Camera calibration.
 	void calibrateCamera();
@@ -68,6 +70,8 @@ public:
 	 * boardRectangleHeight - The height of one board rectangle.
 	 */
 	void startCalibration(int imageAmount, int imageDelay, int boardWidth, int boardHeight, float boardRectangleWidth, float boardRectangleHeight, IImageReceiver* calibrationImageReceiver);
+	void abortCalibration();
+	bool isCalibrated();
 	
 	// Tracking
 	void addQuadcopter(QuadcopterColor* qc);

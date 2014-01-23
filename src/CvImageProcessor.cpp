@@ -100,7 +100,7 @@ void CvImageProcessor::calibrateCamera()
 	int successfulImageAmount = 0;
 	
 	// Loop until we got enough images for calibration.
-	while (successfulImageAmount < imageAmount) {
+	while (successfulImageAmount < imageAmount && !abortCalibrationFlag) {
 		// Wait a bit to give the user time to move the chessboard.
 		usleep(1000 * imageDelay);
 		
@@ -193,7 +193,7 @@ void CvImageProcessor::startCalibration(int imageAmount, int imageDelay, int boa
 	this->boardRectangleWidth = boardRectangleWidth;
 	this->boardRectangleHeight = boardRectangleHeight;
 	this->calibrationImageReceiver = calibrationImageReceiver;
-	abortCalibration = false;
+	abortCalibrationFlag = false;
 	
 	setIntrinsicsMatrix(0);
 	setDistortionCoefficients(0);
@@ -258,6 +258,26 @@ void CvImageProcessor::removeQuadcopter(int id)
 			trackers.erase(it);
 		}
 	}
+}
+
+cv::Mat* CvImageProcessor::getIntrinsicsMatrix()
+{
+	return new cv::Mat(*intrinsicsMatrix);
+}
+
+cv::Mat* CvImageProcessor::getDistortionCoefficients()
+{
+	return new cv::Mat(*distortionCoefficients);
+}
+
+void CvImageProcessor::abortCalibration()
+{
+	abortCalibrationFlag = true;
+}
+
+bool CvImageProcessor::isCalibrated()
+{
+	return intrinsicsMatrix != 0 && distortionCoefficients != 0;
 }
 
 CvImageProcessor::~CvImageProcessor()
