@@ -31,9 +31,9 @@ int main(int argc, char** argv)
 	std::cout << "Starting ROS Node" << std::endl;
 	ros::init(argc, argv, "TestTracker");
 	
-	if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) {
-		ros::console::notifyLoggerLevelsChanged();
-	}
+	/* if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) { */
+	/* 	ros::console::notifyLoggerLevelsChanged(); */
+	/* } */
 	
 	srand(time(0));
 	
