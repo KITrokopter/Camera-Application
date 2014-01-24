@@ -33,6 +33,8 @@ void CvKinect::VideoCallback(void* _rgb, uint32_t timestamp)
 		cv::Mat* imageCopy = new cv::Mat(*image);
 		(*it)->receiveImage(imageCopy, time);
 	}
+	
+	delete image;
 }
 
 // Do not call directly even in child
