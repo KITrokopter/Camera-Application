@@ -82,8 +82,8 @@ void CvImageProcessor::calibrateCamera()
 	// Allocate storage.
 	std::vector<std::vector<cv::Point2f> > imagePoints;
 	std::vector<std::vector<cv::Point3f> > allObjectPoints;
-	cv::Mat intrinsicsMatrix = cv::Mat::eye(3, 3, CV_32F);
-	cv::Mat distortionCoefficients = cv::Mat::zeros(5, 1, CV_32F);
+	cv::Mat intrinsicsMatrix = cv::Mat::eye(3, 3, CV_64F);
+	cv::Mat distortionCoefficients = cv::Mat::zeros(5, 1, CV_64F);
 	
 	// Fill object points with data about the chessboard
 	std::vector<cv::Point3f>* objectPoints = createObjectPoints();
@@ -109,7 +109,7 @@ void CvImageProcessor::calibrateCamera()
 		
 		// Find chessboard corners.
 		std::vector<cv::Point2f> corners;
-		bool foundAllCorners = cv::findChessboardCorners(*image, boardSize, corners, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
+		bool foundAllCorners = cv::findChessboardCorners(*image, boardSize, corners, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
 		
 		if (foundAllCorners) {
 			std::cout << "Found good image" << std::endl;
@@ -146,11 +146,12 @@ void CvImageProcessor::calibrateCamera()
 	
 	// Calibrate camera.
 	// Use CV_CALIB_FIX_K3, since k3 is only really useful for fisheye lenses.
-	calibrationError = cv::calibrateCamera(allObjectPoints, imagePoints, cv::Size(CvKinect::KINECT_IMAGE_WIDTH, CvKinect::KINECT_IMAGE_HEIGHT), intrinsicsMatrix, distortionCoefficients, rvecs, tvecs, 0/*CV_CALIB_FIX_K3*/, cv::TermCriteria(cv::TermCriteria::COUNT | cv::TermCriteria::EPS, 30, DBL_EPSILON));
+	calibrationError = cv::calibrateCamera(allObjectPoints, imagePoints, cv::Size(CvKinect::KINECT_IMAGE_WIDTH, CvKinect::KINECT_IMAGE_HEIGHT), intrinsicsMatrix, distortionCoefficients, rvecs, tvecs, CV_CALIB_FIX_K3 | CV_CALIB_FIX_K4 | CV_CALIB_FIX_K5 | CV_CALIB_FIX_K6 | CV_CALIB_USE_INTRINSIC_GUESS, cv::TermCriteria(cv::TermCriteria::COUNT | cv::TermCriteria::EPS, 300, DBL_EPSILON));
 	
 	setIntrinsicsMatrix(&intrinsicsMatrix);
 	setDistortionCoefficients(&distortionCoefficients);
 	std::cout << "Calibration successful" << std::endl;
+	ROS_DEBUG("Error: %f, Target: %f", calibrationError, DBL_EPSILON);
 	
 	// Free object description
 	delete objectPoints;

@@ -11,7 +11,7 @@
 //#define QC_REGISTER
 
 // Use this for debugging the object recognition.
-//#define QC_DEBUG_TRACKER
+#define QC_DEBUG_TRACKER
 
 #ifdef QC_DEBUG_TRACKER
 #include <opencv2/highgui/highgui.hpp>
