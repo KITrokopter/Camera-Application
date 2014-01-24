@@ -44,12 +44,12 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * uncomment the generate_messages entry below
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
-## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+# Generate messages in the 'msg' folder
+add_message_files(
+  FILES
+  Picture.msg
+  PictureSendingActivation.msg
+)
 
 # Generate services in the 'srv' folder
 add_service_files(
@@ -103,11 +103,24 @@ include_directories(
 #  src/${PROJECT_NAME}/src/CvKinect.cpp
 #)
 
+## Declare a cpp executable
+add_executable(Camera-Application_node
+  src/main.cpp
+  src/CvKinect.cpp
+  src/Mutex.cpp
+  src/ImageAnalyzer.cpp
+  src/CvImageProcessor.cpp
+  src/QuadcopterColor.cpp
+  src/Tracker.cpp
+  src/profiling.cpp
+  src/Communicator.cpp
+)
+
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(Camera-Application_node Camera-Application_generate_messages_cpp)
 
-add_executable(Camera-Application_node src/main.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp src/CvImageProcessor.cpp src/QuadcopterColor.cpp src/Tracker.cpp src/profiling.cpp)
+## Specify libraries to link a library or executable target against
 target_link_libraries(Camera-Application_node ${catkin_LIBRARIES}
   libopencv_core.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so libcvblob.so libopencv_highgui.so
 )

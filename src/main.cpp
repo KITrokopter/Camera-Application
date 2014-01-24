@@ -12,6 +12,7 @@
 #include "libfreenect.hpp"
 #include "CvKinect.hpp"
 #include "CvImageProcessor.hpp"
+#include "Communicator.hpp"
 
 bool startsWith(const char *prefix, const char *str)
 {
@@ -94,7 +95,9 @@ int main(int argc, char** argv)
 	CvImageProcessor* analyzer = new CvImageProcessor(&device, 0); // TODO second argument should not be null
 	
 	// Do ROS stuff.
-	
+	Communicator comm(&device, analyzer);
+	ROS_INFO("Initialized.");
+	ros::spin();
 	
 	ros::shutdown();
 	

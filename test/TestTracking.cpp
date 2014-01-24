@@ -63,9 +63,9 @@ int main(int argc, char** argv)
 	std::cout << "Starting ROS Node" << std::endl;
 	ros::init(argc, argv, "TestTakePicture");
 	
-	if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) {
-		ros::console::notifyLoggerLevelsChanged();
-	}
+	/* if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) { */
+	/* 	ros::console::notifyLoggerLevelsChanged(); */
+	/* } */
 	
 	ROS_DEBUG("Starting test");
 	std::cout << "ROS Node started" << std::endl;
