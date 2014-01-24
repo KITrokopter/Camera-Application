@@ -26,11 +26,12 @@ void CvKinect::VideoCallback(void* _rgb, uint32_t timestamp)
 	m_rgb_mutex.unlock();
 	
 	long int time = getNanoTime();
-
+	cv::Mat* image = new cv::Mat(cv::Size(640,480), CV_8UC3);
+	getVideo(*image);
+	
 	for (std::vector<IImageReceiver*>::iterator it = imageReceivers.begin(); it != imageReceivers.end(); it++) {
-		cv::Mat* image = new cv::Mat(cv::Size(640,480), CV_8UC3, cv::Scalar(0));
-		getVideo(*image);
-		(*it)->receiveImage(image, time);
+		cv::Mat* imageCopy = new cv::Mat(*image);
+		(*it)->receiveImage(imageCopy, time);
 	}
 }
 
@@ -44,7 +45,7 @@ void CvKinect::DepthCallback(void* _depth, uint32_t timestamp)
 	m_new_depth_frame = true;
 	m_depth_mutex.unlock();
 }
-	
+
 bool CvKinect::getVideo(cv::Mat& output)
 {
 	m_rgb_mutex.lock();

@@ -3,6 +3,7 @@
 #include <ros/ros.h>
 #include <iostream>
 #include <libfreenect.hpp>
+#include <string>
 
 #include "../src/CvKinect.hpp"
 #include "../src/IImageReceiver.hpp"
@@ -13,22 +14,26 @@ class TestCalibration : public IImageReceiver
 {
 private:
 	cv::Mat* lastImage;
+	std::string name;
 	
 public:
-	TestCalibration();
+	TestCalibration(std::string name);
 	void receiveImage(cv::Mat* image, long int time);
 	~TestCalibration();
 };
 
-TestCalibration::TestCalibration()
+TestCalibration::TestCalibration(std::string name)
 {
+	this->name = name;
 	cv::startWindowThread();
-	cv::namedWindow("Calibration Test");
+	cv::namedWindow(name);
 	lastImage = 0;
 }
 
 void TestCalibration::receiveImage(cv::Mat* image, long int time) {
-	cv::imshow("Calibration Test", *image);
+	cv::imshow(name, *image);
+	
+	std::cout << "Image: " << image << std::endl;
 	
 	if (lastImage != 0) {
 		delete lastImage;
@@ -42,7 +47,7 @@ TestCalibration::~TestCalibration() {
 		delete lastImage;
 	}
 	
-	cv::destroyWindow("Calibration Test");
+	cv::destroyWindow(name);
 }
 
 int main(int argc, char** argv)
@@ -55,7 +60,7 @@ int main(int argc, char** argv)
 	Freenect::Freenect freenect;
 	CvKinect& device = freenect.createDevice<CvKinect>(0);
 	CvImageProcessor processor(&device, 0);
-	TestCalibration tc;
+	TestCalibration tc("tc");
 	
 	std::cout << "Starting calibration" << std::endl;
 	
