@@ -62,6 +62,14 @@ bool Communicator::handleInitializeCameraService(
 		this->id = req.ID;
 		this->hsvColorRanges = req.hsvColorRanges;
 		this->quadCopterIds = req.quadCopterIds;
+		
+		// Set quadcopters
+		for (int i = 0; i < this->hsvColorRanges.size(); i++)
+		{
+			QuadcopterColor* color = new QuadcopterColor(hsvColorRanges[i * 2], hsvColorRanges[(i * 2) + 1], quadCopterIds[i]);
+			analyzer->addQuadcopter(color);
+		}
+		
 		res.error = 0;
 	}
 	return true;
@@ -70,7 +78,7 @@ bool Communicator::handleInitializeCameraService(
 void Communicator::handlePictureSendingActivation(
 		const camera_application::PictureSendingActivation::Ptr &msg)
 {
-	if (msg->ID != this->id)
+	if (msg->ID != this->id && msg->ID != 0)
 		return;
 	if (analyzer->isStarted() && !msg->active) {
 		ROS_INFO("Stopping image analyzer.");

@@ -104,7 +104,7 @@ include_directories(
 #)
 
 ## Declare a cpp executable
-add_executable(Camera-Application_node
+add_executable(camera_application_node
   src/main.cpp
   src/CvKinect.cpp
   src/Mutex.cpp
@@ -115,10 +115,10 @@ add_executable(Camera-Application_node
   src/profiling.cpp
   src/Communicator.cpp
 )
-target_link_libraries(Camera-Application_node ${catkin_LIBRARIES}
+target_link_libraries(camera_application_node ${catkin_LIBRARIES}
   libopencv_core.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so libcvblob.so libopencv_highgui.so
 )
-add_dependencies(Camera-Application_node camera_application_generate_messages_cpp)
+add_dependencies(camera_application_node camera_application_generate_messages_cpp)
 
 add_executable(TestTakePicture test/TestTakePicture.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp src/profiling.cpp src/CvImageProcessor.cpp src/QuadcopterColor.cpp src/Tracker.cpp)
 target_link_libraries(TestTakePicture ${catkin_LIBRARIES}
@@ -159,7 +159,7 @@ add_dependencies(TestTracking camera_application_generate_messages_cpp)
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS Camera-Application Camera-Application_node
+# install(TARGETS Camera-Application camera_application_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
