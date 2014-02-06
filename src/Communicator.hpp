@@ -2,7 +2,8 @@
 
 #include <vector>
 
-#include "ros/ros.h"
+#include <opencv2/core/core.hpp>
+#include <ros/ros.h>
 
 #include "CvImageProcessor.hpp"
 #include "CvKinect.hpp"
@@ -15,17 +16,20 @@
 
 // Publishers
 #include "camera_application/Picture.h"
+#include "camera_application/RawPosition.h"
+
 
 /*
  * Class: Communicator
  *
  * Provides communication with ROS.
  */
-class Communicator : public IImageReceiver {
+class Communicator : public IImageReceiver, public ITrackerDataReceiver {
 	public:
 		Communicator(CvKinect *device, CvImageProcessor *analyzer);
 
 		void receiveImage(cv::Mat* image, long int time);
+		void receiveTrackingData(cv::Scalar direction, int id, long int time);
 		void sendPicture(camera_application::Picture::_image_type &data, uint64_t timestamp);
 
 	protected:
@@ -42,6 +46,7 @@ class Communicator : public IImageReceiver {
 		ros::ServiceServer initializeCameraService;
 		ros::Subscriber pictureSendingActivationSubscriber;
 		ros::Publisher picturePublisher;
+		ros::Publisher rawPositionPublisher;
 
 		CvKinect *device;
 		CvImageProcessor *analyzer;

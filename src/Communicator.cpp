@@ -10,14 +10,18 @@ Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
 {
 	ros::NodeHandle n;
 
+	// TODO: get id by announcing to api.
+	
 	// Services
-	this->initializeCameraService = n.advertiseService("initialize_camera", &Communicator::handleInitializeCameraService, this);
+	// TODO: Add id to service name.
+	this->initializeCameraService = n.advertiseService("InitializeCameraService", &Communicator::handleInitializeCameraService, this);
 
 	// Subscribers
-	this->pictureSendingActivationSubscriber = n.subscribe("picture_sending_activation", 1, &Communicator::handlePictureSendingActivation, this);
+	this->pictureSendingActivationSubscriber = n.subscribe("PictureSendingActivation", 1, &Communicator::handlePictureSendingActivation, this);
 
 	// Publishers
-	this->picturePublisher = n.advertise<camera_application::Picture>("picture", 1);
+	this->picturePublisher = n.advertise<camera_application::Picture>("Picture", 1);
+	this->rawPositionPublisher = n.advertise<camera_application::RawPosition>("RawPosition", 1);
 
 	// Listen to the camera.
 	device->addImageReceiver(this);
@@ -34,6 +38,18 @@ void Communicator::receiveImage(cv::Mat* image, long int time)
 	ROS_INFO("notnull: %u", notnull);
 	this->sendPicture(data, (uint64_t)time);
 	delete image;
+}
+
+void Communicator::receiveTrackingData(cv::Scalar direction, int id, long int time)
+{
+	camera_application::RawPosition pos;
+	pos.ID = id;
+	pos.timestamp = time;
+	pos.xPosition = direction[0];
+	pos.yPosition = direction[1];
+	pos.quadcopterId = id;
+	
+	rawPositionPublisher.publish(pos);
 }
 
 void Communicator::sendPicture(camera_application::Picture::_image_type &data, uint64_t timestamp)
