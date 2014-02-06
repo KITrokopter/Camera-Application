@@ -49,6 +49,7 @@ add_message_files(
   FILES
   Picture.msg
   PictureSendingActivation.msg
+  RawPosition.msg
 )
 
 # Generate services in the 'srv' folder
