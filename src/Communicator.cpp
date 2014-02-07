@@ -2,6 +2,7 @@
 #include "Communicator.hpp"
 
 #include <ctime>
+#include "api_application/Announce.h"
 
 Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
 	device(device),
@@ -11,6 +12,32 @@ Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
 	ros::NodeHandle n;
 
 	// TODO: get id by announcing to api.
+	// Advertise myself to API
+	ros::ServiceClient announceClient = n.serviceClient<api_application::Announce>("Announce");
+	
+	api_application::Announce announce;
+	announce.request.type = 3; // 3 means position module
+	announce.request.initializeServiceName = std::string("InitializePositionModule");
+	
+	if (announceClient.call(announce))
+	{
+		id = announce.response.ID;
+	
+		if (id == ~0 /* -1 */)
+		{
+			ROS_ERROR("Error! Got id -1");
+			exit(1);
+		}
+		else
+		{
+			ROS_INFO("Position module successfully announced. Got id %d", id);
+		}
+	}
+	else
+	{
+		ROS_ERROR("Error! Could not announce myself to API!");
+		exit(2);
+	}
 	
 	// Services
 	// TODO: Add id to service name.
