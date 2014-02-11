@@ -63,9 +63,9 @@ int main(int argc, char** argv)
 	std::cout << "Starting ROS Node" << std::endl;
 	ros::init(argc, argv, "TestTakePicture");
 	
-	/*if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) {
+	if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) {
 		ros::console::notifyLoggerLevelsChanged();
-	}*/
+	}
 	
 	ROS_DEBUG("Starting test");
 	std::cout << "ROS Node started" << std::endl;
@@ -78,10 +78,10 @@ int main(int argc, char** argv)
 	
 	std::cout << "Starting calibration" << std::endl;
 	
-	processor.addQuadcopter(new QuadcopterColor(65, 85, 20, 255, 20, 255, 0));
-	processor.addQuadcopter(new QuadcopterColor(95, 115, 20, 255, 20, 255, 1));
+	processor.addQuadcopter(new QuadcopterColor(245, 10, 120, 255, 100, 255, 0));
+// 	processor.addQuadcopter(new QuadcopterColor(95, 115, 20, 255, 20, 255, 1));
 	
-	processor.startCalibration(15, 500, 7, 7, 3, 3, &tc, 0);
+	processor.startCalibration(5, 500, 7, 7, 3, 3, &tc, 0);
 	processor.waitForCalibration();
 	
 	processor.start();
