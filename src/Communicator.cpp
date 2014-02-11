@@ -1,7 +1,8 @@
-
 #include "Communicator.hpp"
 
 #include <ctime>
+#include <iostream>
+#include <string>
 #include "api_application/Announce.h"
 
 Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
@@ -11,7 +12,6 @@ Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
 {
 	ros::NodeHandle n;
 
-	// TODO: get id by announcing to api.
 	// Advertise myself to API
 	ros::ServiceClient announceClient = n.serviceClient<api_application::Announce>("Announce");
 	
@@ -40,30 +40,40 @@ Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
 	}
 	
 	// Services
-	// TODO: Add id to service name.
-	this->initializeCameraService = n.advertiseService("InitializeCameraService", &Communicator::handleInitializeCameraService, this);
+	std::stringstream ss;
+	ss << "InitializeCameraService" << id;
+	
+	this->initializeCameraService = n.advertiseService(ss.str(), &Communicator::handleInitializeCameraService, this);
 
 	// Subscribers
 	this->pictureSendingActivationSubscriber = n.subscribe("PictureSendingActivation", 1, &Communicator::handlePictureSendingActivation, this);
+	this->calibrateCameraSubscriber = n.subscribe("CalibrateCamera", 1, &Communicator::handleCalibrateCamera, this);
+	this->cameraCalibrationDataSubscriber = n.subscribe("CameraCalibrationData", 4, &Communicator::handleCameraCalibrationData, this);
 
 	// Publishers
 	this->picturePublisher = n.advertise<camera_application::Picture>("Picture", 1);
 	this->rawPositionPublisher = n.advertise<camera_application::RawPosition>("RawPosition", 1);
+	this->cameraCalibrationDataPublisher = n.advertise<camera_application::CameraCalibrationData>("CameraCalibrationData", 4);
 
 	// Listen to the camera.
 	device->addImageReceiver(this);
+	
+	pictureNumber = 0;
+	pictureSendingActivated = false;
 }
 
-void Communicator::receiveImage(cv::Mat* image, long int time)
+void Communicator::receiveImage(cv::Mat* image, long int time, int type)
 {
-	unsigned int notnull = 0;
-	camera_application::Picture::_image_type data;
-	for (size_t i = 0; i < (640 * 480); i++) {
-		if (image->data[i]) notnull++;
-		data[i] = image->data[i];
+	if (pictureSendingActivated) {
+		camera_application::Picture::_image_type data;
+		
+		for (size_t i = 0; i < (640 * 480 * 3); i++) {
+			data[i] = image->data[i];
+		}
+		
+		this->sendPicture(data, (uint64_t)time, type);
 	}
-	ROS_INFO("notnull: %u", notnull);
-	this->sendPicture(data, (uint64_t)time);
+	
 	delete image;
 }
 
@@ -79,15 +89,30 @@ void Communicator::receiveTrackingData(cv::Scalar direction, int id, long int ti
 	rawPositionPublisher.publish(pos);
 }
 
-void Communicator::sendPicture(camera_application::Picture::_image_type &data, uint64_t timestamp)
+void Communicator::calibrationFinished(cv::Mat* intrinsicsMatrix, cv::Mat* distortionCoefficients)
 {
-	static uint32_t num = 0;
+	camera_application::CameraCalibrationData msg;
+	msg.createdByCamera = true;
+	
+	for (int i = 0; i < 9; i++) {
+		msg.intrinsics[i] = intrinsicsMatrix->data[i];
+	}
+	
+	for (int i = 0; i < 4; i++) {
+		msg.distortion[i] = distortionCoefficients->data[i];
+	}
+	
+	cameraCalibrationDataPublisher.publish(msg);
+}
 
+void Communicator::sendPicture(camera_application::Picture::_image_type &data, uint64_t timestamp, int type)
+{
 	camera_application::Picture msg;
 	msg.ID = this->id;
-	msg.imageNumber = num++;
+	msg.imageNumber = pictureNumber++;
 	msg.timestamp = timestamp;
 	msg.image = data;
+	msg.calibrationImage = (type == 1);
 
 	this->picturePublisher.publish(msg);
 }
@@ -123,12 +148,36 @@ void Communicator::handlePictureSendingActivation(
 {
 	if (msg->ID != this->id && msg->ID != 0)
 		return;
-	if (analyzer->isStarted() && !msg->active) {
-		ROS_INFO("Stopping image analyzer.");
-		analyzer->stop();
+	
+	pictureSendingActivated = msg->active;
+}
+
+void Communicator::handleCalibrateCamera(
+		const camera_application::CalibrateCamera::Ptr &msg)
+{
+	if (msg->ID == this->id) {
+		analyzer->startCalibration(msg->imageAmount, msg->imageDelay, msg->boardWidth, msg->boardHeight, msg->boardRectangleWidth, msg->boardRectangleHeight, this, this);
 	}
-	else if (!analyzer->isStarted() && msg->active) {
-		ROS_INFO("Starting image analyzer.");
-		analyzer->start();
+}
+
+void Communicator::handleCameraCalibrationData(
+		const camera_application::CameraCalibrationData::Ptr &msg)
+{
+	if (msg->ID == this->id && msg->createdByCamera == false) {
+		cv::Mat intrinsicsMatrix(cv::Size(3, 3), CV_64F);
+		cv::Mat distortionCoefficients(cv::Size(5, 1), CV_64F);
+		
+		for (int i = 0; i < 9; i++) {
+			intrinsicsMatrix.data[i] = msg->intrinsics[i];
+		}
+		
+		for (int i = 0; i < 4; i++) {
+			distortionCoefficients.data[i] = msg->distortion[i];
+		}
+		
+		distortionCoefficients.data[4] = 0;
+		
+		analyzer->setIntrinsicsMatrix(&intrinsicsMatrix);
+		analyzer->setDistortionCoefficients(&distortionCoefficients);
 	}
 }

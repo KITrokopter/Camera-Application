@@ -50,6 +50,8 @@ add_message_files(
   Picture.msg
   PictureSendingActivation.msg
   RawPosition.msg
+  CalibrateCamera.msg
+  CameraCalibrationData.msg
 )
 
 # Generate services in the 'srv' folder

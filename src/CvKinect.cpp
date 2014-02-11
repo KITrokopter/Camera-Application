@@ -31,7 +31,7 @@ void CvKinect::VideoCallback(void* _rgb, uint32_t timestamp)
 	
 	for (std::vector<IImageReceiver*>::iterator it = imageReceivers.begin(); it != imageReceivers.end(); it++) {
 		cv::Mat* imageCopy = new cv::Mat(*image);
-		(*it)->receiveImage(imageCopy, time);
+		(*it)->receiveImage(imageCopy, time, 0);
 	}
 	
 	delete image;

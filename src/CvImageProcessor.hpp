@@ -10,11 +10,13 @@
 #include "ITrackerDataReceiver.hpp"
 #include "IImageReceiver.hpp"
 #include "CvKinect.hpp"
+#include "ICalibrationFinishedListener.hpp"
 
 class CvImageProcessor : public ImageAnalyzer
 {
 private:
 	IImageReceiver* calibrationImageReceiver;
+	ICalibrationFinishedListener* calibrationFinishedListener;
 	ITrackerDataReceiver* dataReceiver;
 	
 	std::vector<cv::Scalar> colorRanges;
@@ -69,7 +71,7 @@ public:
 	 * boardRectangleWidth - The width of one board rectangle.
 	 * boardRectangleHeight - The height of one board rectangle.
 	 */
-	void startCalibration(int imageAmount, int imageDelay, int boardWidth, int boardHeight, float boardRectangleWidth, float boardRectangleHeight, IImageReceiver* calibrationImageReceiver);
+	void startCalibration(int imageAmount, int imageDelay, int boardWidth, int boardHeight, float boardRectangleWidth, float boardRectangleHeight, IImageReceiver* calibrationImageReceiver, ICalibrationFinishedListener* calibrationFinishedListener);
 	void abortCalibration();
 	bool isCalibrated();
 	
@@ -79,6 +81,7 @@ public:
 	
 	void startTracking();
 	void stopTracking();
+	void setDataReceiver(ITrackerDataReceiver* receiver);
 	
 	~CvImageProcessor();
 };

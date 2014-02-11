@@ -92,12 +92,17 @@ int main(int argc, char** argv)
 	
 	Freenect::Freenect freenect;
 	CvKinect& device = freenect.createDevice<CvKinect>(0);
-	CvImageProcessor* analyzer = new CvImageProcessor(&device, 0); // TODO second argument should not be null
+	CvImageProcessor* analyzer = new CvImageProcessor(&device, 0);
 	
 	// Do ROS stuff.
 	Communicator comm(&device, analyzer);
+	analyzer->setDataReceiver(&comm);
+	analyzer->start();
+	
 	ROS_INFO("Initialized.");
 	ros::spin();
+	
+	analyzer->stop();
 	
 	ros::shutdown();
 	

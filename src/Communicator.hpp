@@ -13,10 +13,12 @@
 
 // Subscribers
 #include "camera_application/PictureSendingActivation.h"
+#include "camera_application/CalibrateCamera.h"
 
 // Publishers
 #include "camera_application/Picture.h"
 #include "camera_application/RawPosition.h"
+#include "camera_application/CameraCalibrationData.h" // Also subscriber
 
 
 /*
@@ -24,13 +26,14 @@
  *
  * Provides communication with ROS.
  */
-class Communicator : public IImageReceiver, public ITrackerDataReceiver {
+class Communicator : public IImageReceiver, public ITrackerDataReceiver, public ICalibrationFinishedListener {
 	public:
 		Communicator(CvKinect *device, CvImageProcessor *analyzer);
 
-		void receiveImage(cv::Mat* image, long int time);
+		void receiveImage(cv::Mat* image, long int time, int type);
 		void receiveTrackingData(cv::Scalar direction, int id, long int time);
-		void sendPicture(camera_application::Picture::_image_type &data, uint64_t timestamp);
+		void calibrationFinished(cv::Mat* intrinsicsMatrix, cv::Mat* distortionCoefficients);
+		void sendPicture(camera_application::Picture::_image_type &data, uint64_t timestamp, int type);
 
 	protected:
 		// Services
@@ -41,19 +44,30 @@ class Communicator : public IImageReceiver, public ITrackerDataReceiver {
 		// Subscribers
 		void handlePictureSendingActivation(
 				const camera_application::PictureSendingActivation::Ptr &msg);
+		
+		void handleCalibrateCamera(
+				const camera_application::CalibrateCamera::Ptr &msg);
+		
+		void handleCameraCalibrationData(
+				const camera_application::CameraCalibrationData::Ptr &msg);
 
 	private:
 		ros::ServiceServer initializeCameraService;
 		ros::Subscriber pictureSendingActivationSubscriber;
+		ros::Subscriber calibrateCameraSubscriber;
+		ros::Subscriber cameraCalibrationDataSubscriber;
 		ros::Publisher picturePublisher;
 		ros::Publisher rawPositionPublisher;
+		ros::Publisher cameraCalibrationDataPublisher;
 
 		CvKinect *device;
 		CvImageProcessor *analyzer;
 
 		// Initialization data
 		bool initialized;
+		bool pictureSendingActivated;
 		uint32_t id;
+		uint32_t pictureNumber;
 		std::vector<uint32_t> hsvColorRanges;
 		std::vector<uint32_t> quadCopterIds;
 };

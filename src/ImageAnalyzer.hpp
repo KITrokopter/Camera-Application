@@ -24,7 +24,7 @@ public:
 	void stop();
 	bool isStarted();
 	cv::Mat* getImage();
-	void receiveImage(cv::Mat* image, long int time);
+	void receiveImage(cv::Mat* image, long int time, int type);
 	
 	~ImageAnalyzer();
 };

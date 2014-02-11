@@ -129,7 +129,7 @@ void CvImageProcessor::calibrateCamera()
 			
 			// Notify listener about new image.
 			if (calibrationImageReceiver != 0) {
-				calibrationImageReceiver->receiveImage(new cv::Mat(*image), -1);
+				calibrationImageReceiver->receiveImage(new cv::Mat(*image), successfulImageAmount, 1);
 			}
 			
 			successfulImageAmount++;
@@ -152,6 +152,10 @@ void CvImageProcessor::calibrateCamera()
 	setDistortionCoefficients(&distortionCoefficients);
 	std::cout << "Calibration successful" << std::endl;
 	ROS_DEBUG("Error: %f, Target: %f", calibrationError, DBL_EPSILON);
+	
+	if (calibrationFinishedListener != 0) {
+		calibrationFinishedListener->calibrationFinished(&intrinsicsMatrix, &distortionCoefficients);
+	}
 	
 	// Free object description
 	delete objectPoints;
@@ -185,7 +189,7 @@ cv::Mat* CvImageProcessor::undistortImage(cv::Mat* inputImage) {
 	return undistorted;
 }
 
-void CvImageProcessor::startCalibration(int imageAmount, int imageDelay, int boardWidth, int boardHeight, float boardRectangleWidth, float boardRectangleHeight, IImageReceiver* calibrationImageReceiver)
+void CvImageProcessor::startCalibration(int imageAmount, int imageDelay, int boardWidth, int boardHeight, float boardRectangleWidth, float boardRectangleHeight, IImageReceiver* calibrationImageReceiver, ICalibrationFinishedListener* calibrationFinishedListener)
 {
 	this->imageAmount = imageAmount;
 	this->imageDelay = imageDelay;
@@ -194,6 +198,7 @@ void CvImageProcessor::startCalibration(int imageAmount, int imageDelay, int boa
 	this->boardRectangleWidth = boardRectangleWidth;
 	this->boardRectangleHeight = boardRectangleHeight;
 	this->calibrationImageReceiver = calibrationImageReceiver;
+	this->calibrationFinishedListener = calibrationFinishedListener;
 	abortCalibrationFlag = false;
 	
 	setIntrinsicsMatrix(0);
@@ -243,6 +248,11 @@ void CvImageProcessor::stopTracking()
 	for (std::vector<Tracker*>::iterator it = trackers.begin(); it != trackers.end(); it++) {
 		(*it)->join();
 	}
+}
+
+void CvImageProcessor::setDataReceiver(ITrackerDataReceiver* receiver)
+{
+	this->dataReceiver = receiver;
 }
 
 void CvImageProcessor::addQuadcopter(QuadcopterColor* qc)

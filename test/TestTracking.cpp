@@ -1,4 +1,4 @@
-//#include <opencv2/core/mat.hpp>
+#include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <ros/ros.h>
 #include <iostream>
@@ -16,7 +16,7 @@ private:
 	
 public:
 	TestCalibration();
-	void receiveImage(cv::Mat* image, long int time);
+	void receiveImage(cv::Mat* image, long int time, int type);
 	~TestCalibration();
 };
 
@@ -27,7 +27,7 @@ TestCalibration::TestCalibration()
 	lastImage = 0;
 }
 
-void TestCalibration::receiveImage(cv::Mat* image, long int time) {
+void TestCalibration::receiveImage(cv::Mat* image, long int time, int type) {
 	cv::imshow("Calibration Test", *image);
 	
 	if (lastImage != 0) {
@@ -78,9 +78,10 @@ int main(int argc, char** argv)
 	
 	std::cout << "Starting calibration" << std::endl;
 	
-	processor.addQuadcopter(new QuadcopterColor(245, 10, 120, 255, 80, 255, 0));
+	processor.addQuadcopter(new QuadcopterColor(65, 85, 20, 255, 20, 255, 0));
+	processor.addQuadcopter(new QuadcopterColor(95, 115, 20, 255, 20, 255, 1));
 	
-	processor.startCalibration(15, 500, 11, 8, 3, 3, &tc);
+	processor.startCalibration(15, 500, 11, 8, 3, 3, &tc, 0);
 	processor.waitForCalibration();
 	
 	processor.start();

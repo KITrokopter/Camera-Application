@@ -40,7 +40,7 @@ cv::Mat* ImageAnalyzer::getImage()
 	}
 }
 
-void ImageAnalyzer::receiveImage(cv::Mat* image, long int time)
+void ImageAnalyzer::receiveImage(cv::Mat* image, long int time, int type)
 {
 	imageMutex.lock();
 	

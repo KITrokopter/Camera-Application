@@ -1,4 +1,4 @@
-//#include <opencv2/core/mat.hpp>
+#include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <ros/ros.h>
 #include <iostream>
@@ -18,7 +18,7 @@ private:
 	
 public:
 	TestCalibration(std::string name);
-	void receiveImage(cv::Mat* image, long int time);
+	void receiveImage(cv::Mat* image, long int time, int type);
 	~TestCalibration();
 };
 
@@ -30,10 +30,10 @@ TestCalibration::TestCalibration(std::string name)
 	lastImage = 0;
 }
 
-void TestCalibration::receiveImage(cv::Mat* image, long int time) {
+void TestCalibration::receiveImage(cv::Mat* image, long int time, int type) {
 	cv::imshow(name, *image);
 	
-	std::cout << "Image: " << image << std::endl;
+	std::cout << "Image: " << image << " Type: " << type << std::endl;
 	
 	if (lastImage != 0) {
 		delete lastImage;
@@ -64,7 +64,7 @@ int main(int argc, char** argv)
 	
 	std::cout << "Starting calibration" << std::endl;
 	
-	processor.startCalibration(3, 1000, 11, 8, 3, 3, &tc);
+	processor.startCalibration(3, 1000, 11, 8, 3, 3, &tc, 0);
 	processor.waitForCalibration();
 	
 	std::cout << "Shutting down ROS Node" << std::endl;
