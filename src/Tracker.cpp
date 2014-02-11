@@ -75,10 +75,6 @@ void Tracker::stop()
 		throw new std::runtime_error("Not started.");
 	}
 	
-	if (visualTracker) {
-		cv::destroyWindow(windowName);
-	}
-	
 	stopFlag = true;
 }
 
@@ -304,6 +300,10 @@ void Tracker::executeTracker()
 	#ifdef QC_DEBUG_TRACKER
 	cv::destroyWindow("Tracker");
 	#endif
+	
+	if (visualTracker) {
+		cv::destroyWindow(windowName);
+	}
 	
 	ROS_INFO("Tracker with id %d terminated", ((QuadcopterColor*) this->qc)->getId());
 }
