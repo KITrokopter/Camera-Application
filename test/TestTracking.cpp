@@ -87,10 +87,12 @@ int main(int argc, char** argv)
 	processor.start();
 	processor.startTracking();
 	
-	usleep(1000 * 1000 * 10);
+	usleep(1000 * 1000 * 100);
 	
+	ROS_DEBUG("Stopping tracking");
 	processor.stopTracking();
 	processor.stop();
+	ROS_DEBUG("Tracking stopped");
 	
 	std::cout << "Shutting down ROS Node" << std::endl;
 	ros::shutdown();

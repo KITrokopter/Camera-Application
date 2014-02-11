@@ -220,6 +220,8 @@ void CvImageProcessor::processImage(cv::Mat* image, long int time)
 			(*it)->setNextImage(undistorted, time);
 		}
 		
+		delete undistorted;
+		
 		ROS_DEBUG("Processing image shared between %ld threads", trackers.size());
 	}
 	
@@ -239,15 +241,21 @@ void CvImageProcessor::startTracking()
 
 void CvImageProcessor::stopTracking()
 {
+	ROS_DEBUG("Stopping tracking...");
+	
 	isTracking = false;
 	
 	for (std::vector<Tracker*>::iterator it = trackers.begin(); it != trackers.end(); it++) {
 		(*it)->stop();
 	}
 	
+	ROS_DEBUG("Joining trackers");
+	
 	for (std::vector<Tracker*>::iterator it = trackers.begin(); it != trackers.end(); it++) {
 		(*it)->join();
 	}
+	
+	ROS_DEBUG("Tracking stopped");
 }
 
 void CvImageProcessor::setDataReceiver(ITrackerDataReceiver* receiver)

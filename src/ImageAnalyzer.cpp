@@ -1,6 +1,8 @@
 #include "libfreenect.hpp"
 #include "ImageAnalyzer.hpp"
 
+#include <ros/console.h>
+
 ImageAnalyzer::ImageAnalyzer(CvKinect* imageSource)
 {
 	this->imageSource = imageSource;
@@ -13,12 +15,16 @@ void ImageAnalyzer::start()
 {
 	imageSource->startVideo();
 	videoStarted = true;
+	
+	ROS_DEBUG("Video started");
 }
 
 void ImageAnalyzer::stop()
 {
 	imageSource->stopVideo();
 	videoStarted = false;
+	
+	ROS_DEBUG("Video stopped");
 }
 
 bool ImageAnalyzer::isStarted()
