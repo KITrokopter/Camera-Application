@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 	Freenect::Freenect freenect;
 	CvKinect& device = freenect.createDevice<CvKinect>(0);
 	TestTracker tt;
-	CvImageProcessor processor(&device, &tt);
+	CvImageProcessor processor(&device, &tt, true, false);
 	TestCalibration tc;
 	
 	std::cout << "Starting calibration" << std::endl;

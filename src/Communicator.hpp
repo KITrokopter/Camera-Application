@@ -14,6 +14,7 @@
 // Subscribers
 #include "camera_application/PictureSendingActivation.h"
 #include "camera_application/CalibrateCamera.h"
+#include "api_application/System.h"
 
 // Publishers
 #include "camera_application/Picture.h"
@@ -40,7 +41,7 @@ class Communicator : public IImageReceiver, public ITrackerDataReceiver, public 
 		bool handleInitializeCameraService(
 				camera_application::InitializeCameraService::Request &req,
 				camera_application::InitializeCameraService::Response &res);
-
+		
 		// Subscribers
 		void handlePictureSendingActivation(
 				const camera_application::PictureSendingActivation::Ptr &msg);
@@ -50,12 +51,16 @@ class Communicator : public IImageReceiver, public ITrackerDataReceiver, public 
 		
 		void handleCameraCalibrationData(
 				const camera_application::CameraCalibrationData::Ptr &msg);
+		
+		void handleSystem(
+				const api_application::System::Ptr &msg);
 
 	private:
 		ros::ServiceServer initializeCameraService;
 		ros::Subscriber pictureSendingActivationSubscriber;
 		ros::Subscriber calibrateCameraSubscriber;
 		ros::Subscriber cameraCalibrationDataSubscriber;
+		ros::Subscriber systemSubscriber;
 		ros::Publisher picturePublisher;
 		ros::Publisher rawPositionPublisher;
 		ros::Publisher cameraCalibrationDataPublisher;

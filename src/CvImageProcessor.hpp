@@ -38,6 +38,8 @@ private:
 	// Tracking
 	std::vector<Tracker*> trackers;
 	bool isTracking;
+	bool visualTracker;
+	bool useMaskedImage;
 	
 	// Methods
 	std::vector<cv::Point3f>* createObjectPoints();
@@ -45,6 +47,8 @@ private:
 	
 public:
 	CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* dataReceiver);
+	CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* dataReceiver, bool visualTracker, bool useMaskedImage);
+	
 	void processImage(cv::Mat* image, long int time);
 	
 	void setIntrinsicsMatrix(cv::Mat* intrinsicsMatrix);

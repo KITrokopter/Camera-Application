@@ -16,17 +16,8 @@
 // Use this to use the register keyword in some places. Might make things faster, but I didn't test it.
 //#define QC_REGISTER
 
-// WARNING:
-// You should not define QC_DEBUG_TRACKER and QC_VISUAL_TRACKER at once!!
-
-// Use this for debugging the object recognition.
+// Use this for debugging the object recognition. WARNING: Might lead to errors or strange behaviour when used with visualTracker == true.
 //#define QC_DEBUG_TRACKER
-
-// Use this to show the image the tracker sees with the quadcopter if it is found.
-#define QC_VISUAL_TRACKER
-
-// Use this to show the masked image if you used QC_VISUAL_TRACKER
-//#define QC_USE_MASKED_IMAGE
 
 Tracker::Tracker(ITrackerDataReceiver* dataReceiver, QuadcopterColor* color)
 {
@@ -35,17 +26,27 @@ Tracker::Tracker(ITrackerDataReceiver* dataReceiver, QuadcopterColor* color)
 	this->image = 0;
 	this->qc = color;
 	
-	#ifdef QC_VISUAL_TRACKER
-	this->visualTracker = true;
-	
-	std::stringstream ss;
-	ss << "Tracker of id " << ((QuadcopterColor*) this->qc)->getId();
-	
-	this->windowName = ss.str();
-	cv::startWindowThread();
-	#else
 	this->visualTracker = false;
-	#endif
+	this->useMaskedImage = false;
+}
+
+Tracker::Tracker(ITrackerDataReceiver* dataReceiver, QuadcopterColor* color, bool visualTracker, bool useMaskedImage)
+{
+	this->dataReceiver = dataReceiver;
+	this->thread = 0;
+	this->image = 0;
+	this->qc = color;
+	
+	this->visualTracker = visualTracker;
+	this->useMaskedImage = useMaskedImage;
+	
+	if (visualTracker) {
+		std::stringstream ss;
+		ss << "Tracker of id " << ((QuadcopterColor*) this->qc)->getId();
+		
+		this->windowName = ss.str();
+		cv::startWindowThread();
+	}
 }
 
 Tracker::~Tracker()
@@ -115,7 +116,7 @@ QuadcopterColor* Tracker::getQuadcopterColor()
 	return (QuadcopterColor*) qc;
 }
 
-void Tracker::drawCross(cv::Mat mat, const int x, const int y)
+void Tracker::drawCross(cv::Mat* mat, const int x, const int y)
 {
 	ROS_DEBUG("Drawing cross.");
 	
@@ -123,8 +124,8 @@ void Tracker::drawCross(cv::Mat mat, const int x, const int y)
 		int j = y;
 		
 // 		ROS_DEBUG("i/j: %d/%d", i, j);
-		if (i >= 0 && i < mat.rows && j >= 0 && j < mat.cols) {
-			unsigned char* element = mat.data + mat.step[0] * j + mat.step[1] * i;
+		if (i >= 0 && i < mat->rows && j >= 0 && j < mat->cols) {
+			unsigned char* element = mat->data + mat->step[0] * j + mat->step[1] * i;
 			
 			unsigned char color;
 			
@@ -144,8 +145,8 @@ void Tracker::drawCross(cv::Mat mat, const int x, const int y)
 		int i = x;
 		
 // 		ROS_DEBUG("i/j: %d/%d", i, j);
-		if (i >= 0 && i < mat.rows && j >= 0 && j < mat.cols) {
-			unsigned char* element = mat.data + mat.step[0] * j + mat.step[1] * i;
+		if (i >= 0 && i < mat->rows && j >= 0 && j < mat->cols) {
+			unsigned char* element = mat->data + mat->step[0] * j + mat->step[1] * i;
 		
 			unsigned char color;
 			
@@ -192,11 +193,12 @@ void Tracker::executeTracker()
 		imageDirty = false;
 		imageMutex.unlock();
 		
-		#ifdef QC_VISUAL_TRACKER
-		#ifndef QC_USE_MASKED_IMAGE
-		cv::Mat visualImage = image->clone();
-		#endif
-		#endif
+		cv::Mat* visualImage = 0;
+		
+		if (visualTracker && !useMaskedImage) {
+			visualImage = new cv::Mat(image->size(), image->type());
+			image->copyTo(*visualImage);
+		}
 		
 		#ifdef QC_DEBUG_TRACKER
 		cv::imshow("Tracker", *image);
@@ -205,19 +207,17 @@ void Tracker::executeTracker()
 		
 		cv::Mat* mapImage = createColorMapImage(image);
 		
-		#ifdef QC_VISUAL_TRACKER
-		#ifdef QC_USE_MASKED_IMAGE
-		// Convert to 3 channel image.
-		cv::Mat visualImage(cv::Size(640, 480), CV_8UC3);
-		int target = 0;
+		if (visualTracker && useMaskedImage) {
+			// Convert to 3 channel image.
+			visualImage = new cv::Mat(cv::Size(640, 480), CV_8UC3);
+			int target = 0;
 		
-		for (int i = 0; i < mapImage->total(); ++i) {
-			visualImage.data[target++] = mapImage->data[i];
-			visualImage.data[target++] = mapImage->data[i];
-			visualImage.data[target++] = mapImage->data[i];
+			for (int i = 0; i < mapImage->total(); ++i) {
+				visualImage->data[target++] = mapImage->data[i];
+				visualImage->data[target++] = mapImage->data[i];
+				visualImage->data[target++] = mapImage->data[i];
+			}
 		}
-		#endif
-		#endif
 		
 		#ifdef QC_DEBUG_TRACKER
 		cv::imshow("Tracker", *mapImage);
@@ -246,16 +246,18 @@ void Tracker::executeTracker()
 		cv::imshow("Tracker", cv::Mat(&iplImage));
 		cv::waitKey(100000);
 		cvReleaseTracks(tracks);
+		ROS_DEBUG("Exiting debug block"); // TODO Tracking down issue #7
 		#endif
 		
-		#ifdef QC_VISUAL_TRACKER
-		IplImage iplImage = visualImage;
-		cvRenderBlobs(labelImg, blobs, &iplImage, &iplImage, CV_BLOB_RENDER_BOUNDING_BOX);
-		cvb::CvTracks tracks;
-		cvUpdateTracks(blobs, tracks, 200., 5);
-		cvRenderTracks(tracks, &iplImage, &iplImage, CV_TRACK_RENDER_ID | CV_TRACK_RENDER_BOUNDING_BOX);
-		cvReleaseTracks(tracks);
-		#endif
+		if (visualTracker) {
+			IplImage iplImage = *visualImage;
+			cvRenderBlobs(labelImg, blobs, &iplImage, &iplImage, CV_BLOB_RENDER_BOUNDING_BOX);
+			cvb::CvTracks tracks;
+			cvUpdateTracks(blobs, tracks, 200., 5);
+			cvRenderTracks(tracks, &iplImage, &iplImage, CV_TRACK_RENDER_ID | CV_TRACK_RENDER_BOUNDING_BOX);
+			cvReleaseTracks(tracks);
+			ROS_DEBUG("Exiting visual block"); // TODO Tracking down issue #7
+		}
 		
 		if (blobs.size() != 0) {
 			// Find biggest blob
@@ -275,18 +277,23 @@ void Tracker::executeTracker()
 			
 			dataReceiver->receiveTrackingData(cv::Scalar(x, y, 1.0), ((QuadcopterColor*) qc)->getId(), time);
 			
-			#ifdef QC_VISUAL_TRACKER
-			drawCross(visualImage, center.x, center.y);
-			#endif
+			if (visualTracker) {
+				drawCross(visualImage, center.x, center.y);
+			}
 		}
 		
 		// Free cvb stuff.
 		cvReleaseBlobs(blobs);
 		cvReleaseImage(&labelImg);
 		
-		#ifdef QC_VISUAL_TRACKER
-		cv::imshow(windowName, visualImage);
-		#endif
+		ROS_DEBUG("cvb stuff freed"); // TODO Tracking down issue #7
+		
+		if (visualTracker) {
+			cv::imshow(windowName, *visualImage);
+			delete visualImage;
+			
+			ROS_DEBUG("showed visual image"); // TODO Tracking down issue #7
+		}
 		
 		delete mapImage;
 		delete image;

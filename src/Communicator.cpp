@@ -49,6 +49,7 @@ Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
 	this->pictureSendingActivationSubscriber = n.subscribe("PictureSendingActivation", 1, &Communicator::handlePictureSendingActivation, this);
 	this->calibrateCameraSubscriber = n.subscribe("CalibrateCamera", 1, &Communicator::handleCalibrateCamera, this);
 	this->cameraCalibrationDataSubscriber = n.subscribe("CameraCalibrationData", 4, &Communicator::handleCameraCalibrationData, this);
+	this->systemSubscriber = n.subscribe("System", 2, &Communicator::handleSystem, this);
 
 	// Publishers
 	this->picturePublisher = n.advertise<camera_application::Picture>("Picture", 1);
@@ -179,5 +180,20 @@ void Communicator::handleCameraCalibrationData(
 		
 		analyzer->setIntrinsicsMatrix(&intrinsicsMatrix);
 		analyzer->setDistortionCoefficients(&distortionCoefficients);
+	}
+}
+
+void Communicator::handleSystem(
+		const api_application::System::Ptr &msg)
+{
+	if (msg.command == 1) {
+		// Start
+		
+		analyzer.startTracking();
+	} else if (msg.command == 2) {
+		// Stop
+		
+		analyzer.stopTracking();
+		ros::shutdown();
 	}
 }

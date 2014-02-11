@@ -12,6 +12,21 @@ CvImageProcessor::CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* 
 	this->dataReceiver = dataReceiver;
 	this->calibrationImageReceiver = 0;
 	this->isTracking = false;
+	this->visualTracker = false;
+	this->useMaskedImage = false;
+}
+
+CvImageProcessor::CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* dataReceiver, bool visualTracker, bool useMaskedImage)
+: ImageAnalyzer::ImageAnalyzer(imageSource)
+{
+	this->intrinsicsMatrix = 0;
+	this->distortionCoefficients = 0;
+	this->calibrationThread = 0;
+	this->dataReceiver = dataReceiver;
+	this->calibrationImageReceiver = 0;
+	this->isTracking = false;
+	this->visualTracker = visualTracker;
+	this->useMaskedImage = useMaskedImage;
 }
 
 void CvImageProcessor::setIntrinsicsMatrix(cv::Mat* intrinsicsMatrix)
@@ -265,7 +280,7 @@ void CvImageProcessor::setDataReceiver(ITrackerDataReceiver* receiver)
 
 void CvImageProcessor::addQuadcopter(QuadcopterColor* qc)
 {
-	Tracker* tracker = new Tracker(dataReceiver, qc);
+	Tracker* tracker = new Tracker(dataReceiver, qc, visualTracker, useMaskedImage);
 	trackers.push_back(tracker);
 }
 
