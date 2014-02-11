@@ -26,7 +26,7 @@
 #define QC_VISUAL_TRACKER
 
 // Use this to show the masked image if you used QC_VISUAL_TRACKER
-#define QC_USE_MASKED_IMAGE
+//#define QC_USE_MASKED_IMAGE
 
 Tracker::Tracker(ITrackerDataReceiver* dataReceiver, QuadcopterColor* color)
 {
@@ -280,8 +280,9 @@ void Tracker::executeTracker()
 			#endif
 		}
 		
-		// Free cvb stuff. TODO probably incomplete.
+		// Free cvb stuff.
 		cvReleaseBlobs(blobs);
+		cvReleaseImage(&labelImg);
 		
 		#ifdef QC_VISUAL_TRACKER
 		cv::imshow(windowName, visualImage);

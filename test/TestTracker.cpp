@@ -37,7 +37,7 @@ int main(int argc, char** argv)
 	
 	srand(time(0));
 	
-	QuadcopterColor* color = new QuadcopterColor(245, 10, 120, 255, 80, 255, 0);
+	QuadcopterColor* color = new QuadcopterColor(245, 10, 110, 255, 60, 255, 0);
 	Tracker tracker(new TestTracker(), color);
 	
 	tracker.start();
