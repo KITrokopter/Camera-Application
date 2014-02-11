@@ -1,10 +1,16 @@
 #include "Tracker.hpp"
 
 #include <stdexcept>
+#include <iostream>
+#include <stdlib.h>
+
 #include <opencv2/imgproc/imgproc.hpp>
-#include <ros/console.h>
+#include <opencv2/highgui/highgui.hpp>
 #include <cvblob.h>
+
+#include <ros/console.h>
 #include <cmath>
+
 #include "profiling.hpp"
 
 // Use this to use the register keyword in some places. Might make things faster, but I didn't test it.
@@ -13,9 +19,8 @@
 // Use this for debugging the object recognition.
 //#define QC_DEBUG_TRACKER
 
-#ifdef QC_DEBUG_TRACKER
-#include <opencv2/highgui/highgui.hpp>
-#endif
+// Use this to show the image the tracker sees with the quadcopter if it is found.
+#define QC_VISUAL_TRACKER
 
 Tracker::Tracker(ITrackerDataReceiver* dataReceiver, QuadcopterColor* color)
 {
@@ -23,12 +28,32 @@ Tracker::Tracker(ITrackerDataReceiver* dataReceiver, QuadcopterColor* color)
 	this->thread = 0;
 	this->image = 0;
 	this->qc = color;
+	
+	#ifdef QC_VISUAL_TRACKER
+	this->visualTracker = true;
+	
+	std::stringstream ss;
+	ss << "Tracker of id " << ((QuadcopterColor*) this->qc)->getId();
+	
+	this->windowName = ss.str();
+	#else
+	this->visualTracker = false;
+	#endif
+}
+
+Tracker::~Tracker()
+{
 }
 	
 void Tracker::start()
 {
 	if (thread != 0) {
 		throw new std::runtime_error("Already started. (Maybe you forgot to call join?)");
+	}
+	
+	if (visualTracker) {
+		cv::namedWindow(windowName);
+		cv::startWindowThread();
 	}
 	
 	imageDirty = false;
@@ -41,6 +66,10 @@ void Tracker::stop()
 {
 	if (thread == 0) {
 		throw new std::runtime_error("Not started.");
+	}
+	
+	if (visualTracker) {
+		cv::destroyWindow(windowName);
 	}
 	
 	stopFlag = true;
@@ -80,6 +109,51 @@ QuadcopterColor* Tracker::getQuadcopterColor()
 	return (QuadcopterColor*) qc;
 }
 
+void Tracker::drawCross(cv::Mat mat, const int x, const int y)
+{
+	for (int i = x - 10; i <= x + 10; i++) {
+		int j = y;
+		unsigned char* element = 0;
+		
+		if (i >= 0 && i < mat.rows && j >= 0 && j < mat.cols) {
+			element = mat.data + mat.step[0] * i + mat.step[1] * j;
+		}
+		
+		unsigned char color;
+		
+		if (i + j % 2 == 0) {
+			color = 0xFF;
+		} else {
+			color = 0;
+		}
+		
+		element[0] = color;
+		element[1] = color;
+		element[2] = color;
+	}
+	
+	for (int j = y - 10; j <= y + 10; j++) {
+		int i = x;
+		unsigned char* element = 0;
+		
+		if (i >= 0 && i < mat.rows && j >= 0 && j < mat.cols) {
+			element = mat.data + mat.step[0] * i + mat.step[1] * j;
+		}
+		
+		unsigned char color;
+		
+		if (i + j % 2 == 0) {
+			color = 0xFF;
+		} else {
+			color = 0;
+		}
+		
+		element[0] = color;
+		element[1] = color;
+		element[2] = color;
+	}
+}
+
 void Tracker::executeTracker()
 {
 	#ifdef QC_DEBUG_TRACKER
@@ -107,6 +181,10 @@ void Tracker::executeTracker()
 		long int time = this->imageTime;
 		imageDirty = false;
 		imageMutex.unlock();
+		
+		#ifdef QC_VISUAL_TRACKER
+		cv::Mat visualImage = image->clone();
+		#endif
 		
 		#ifdef QC_DEBUG_TRACKER
 		cv::imshow("Tracker", *image);
@@ -161,10 +239,18 @@ void Tracker::executeTracker()
 			y *= verticalScalingFactor;
 			
 			dataReceiver->receiveTrackingData(cv::Scalar(x, y, 1.0), ((QuadcopterColor*) qc)->getId(), time);
+			
+			#ifdef QC_VISUAL_TRACKER
+			drawCross(visualImage, center.x, center.y);
+			#endif
 		}
 		
 		// Free cvb stuff. TODO probably incomplete.
 		cvReleaseBlobs(blobs);
+		
+		#ifdef QC_VISUAL_TRACKER
+		cv::imshow(windowName, visualImage);
+		#endif
 		
 		delete mapImage;
 		delete image;

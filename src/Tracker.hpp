@@ -3,6 +3,7 @@
 
 #include <boost/thread.hpp>
 #include <opencv2/core/core.hpp>
+#include <string>
 
 #include "QuadcopterColor.hpp"
 #include "Mutex.hpp"
@@ -23,12 +24,17 @@ private:
 	Mutex imageMutex;
 	ITrackerDataReceiver* dataReceiver;
 	
+	bool visualTracker;
+	std::string windowName;
+	
 	// Methods
 	void executeTracker();
 	cv::Mat* createColorMapImage(cv::Mat* image);
+	void drawCross(cv::Mat mat, int i, int j);
 	
 public:
 	Tracker(ITrackerDataReceiver* dataReceiver, QuadcopterColor* color);
+	~Tracker();
 	
 	void start();
 	void stop();

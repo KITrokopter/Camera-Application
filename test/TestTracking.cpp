@@ -81,7 +81,7 @@ int main(int argc, char** argv)
 	processor.addQuadcopter(new QuadcopterColor(65, 85, 20, 255, 20, 255, 0));
 	processor.addQuadcopter(new QuadcopterColor(95, 115, 20, 255, 20, 255, 1));
 	
-	processor.startCalibration(15, 500, 11, 8, 3, 3, &tc, 0);
+	processor.startCalibration(15, 500, 7, 7, 3, 3, &tc, 0);
 	processor.waitForCalibration();
 	
 	processor.start();
