@@ -8,7 +8,7 @@ class IImageReceiver
 public:
 	/**
 	 * Passes a copy of the received image.
-	 * The receiver has to delete the object.
+	 * The receiver has to delete the image object.
 	 * 
 	 * @param image The image.
 	 * @param time The time the image was taken.

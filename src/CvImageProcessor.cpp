@@ -85,6 +85,8 @@ std::vector<cv::Point2f>* CvImageProcessor::createImagePoints()
 
 void CvImageProcessor::calibrateCamera()
 {
+	clearCalibrationImages();
+	
 	bool videoStarted = isStarted();
 	
 	if (!videoStarted) {
@@ -154,22 +156,24 @@ void CvImageProcessor::calibrateCamera()
 		}
 	}
 	
-	std::vector<cv::Mat> rvecs;
-	std::vector<cv::Mat> tvecs;
-	
-	std::cout << "Start calibration calculation" << std::endl;
-	
-	// Calibrate camera.
-	// Use CV_CALIB_FIX_K3, since k3 is only really useful for fisheye lenses.
-	calibrationError = cv::calibrateCamera(allObjectPoints, imagePoints, cv::Size(CvKinect::KINECT_IMAGE_WIDTH, CvKinect::KINECT_IMAGE_HEIGHT), intrinsicsMatrix, distortionCoefficients, rvecs, tvecs, CV_CALIB_FIX_K3 | CV_CALIB_FIX_K4 | CV_CALIB_FIX_K5 | CV_CALIB_FIX_K6 | CV_CALIB_USE_INTRINSIC_GUESS, cv::TermCriteria(cv::TermCriteria::COUNT | cv::TermCriteria::EPS, 300, DBL_EPSILON));
-	
-	setIntrinsicsMatrix(&intrinsicsMatrix);
-	setDistortionCoefficients(&distortionCoefficients);
-	std::cout << "Calibration successful" << std::endl;
-	ROS_DEBUG("Error: %f, Target: %f", calibrationError, DBL_EPSILON);
+	if (!abortCalibrationFlag) {
+		std::vector<cv::Mat> rvecs;
+		std::vector<cv::Mat> tvecs;
+		
+		std::cout << "Start calibration calculation" << std::endl;
+		
+		// Calibrate camera.
+		// Use CV_CALIB_FIX_K3, since k3 is only really useful for fisheye lenses.
+		calibrationError = cv::calibrateCamera(allObjectPoints, imagePoints, cv::Size(CvKinect::KINECT_IMAGE_WIDTH, CvKinect::KINECT_IMAGE_HEIGHT), intrinsicsMatrix, distortionCoefficients, rvecs, tvecs, CV_CALIB_FIX_K3 | CV_CALIB_FIX_K4 | CV_CALIB_FIX_K5 | CV_CALIB_FIX_K6 | CV_CALIB_USE_INTRINSIC_GUESS, cv::TermCriteria(cv::TermCriteria::COUNT | cv::TermCriteria::EPS, 300, DBL_EPSILON));
+		
+		setIntrinsicsMatrix(&intrinsicsMatrix);
+		setDistortionCoefficients(&distortionCoefficients);
+		std::cout << "Calibration successful" << std::endl;
+		ROS_DEBUG("Error: %f, Target: %f", calibrationError, DBL_EPSILON);
+	}
 	
 	if (calibrationFinishedListener != 0) {
-		calibrationFinishedListener->calibrationFinished(&intrinsicsMatrix, &distortionCoefficients);
+		calibrationFinishedListener->calibrationFinished(getIntrinsicsMatrix(), getDistortionCoefficients());
 	}
 	
 	// Free object description
@@ -245,6 +249,10 @@ void CvImageProcessor::processImage(cv::Mat* image, long int time)
 
 void CvImageProcessor::startTracking()
 {
+	if (isTracking) {
+		return;
+	}
+	
 	for (std::vector<Tracker*>::iterator it = trackers.begin(); it != trackers.end(); it++) {
 		(*it)->start();
 	}
@@ -256,6 +264,10 @@ void CvImageProcessor::startTracking()
 
 void CvImageProcessor::stopTracking()
 {
+	if (!isTracking) {
+		return;
+	}
+	
 	ROS_DEBUG("Stopping tracking...");
 	
 	isTracking = false;
@@ -316,4 +328,5 @@ bool CvImageProcessor::isCalibrated()
 
 CvImageProcessor::~CvImageProcessor()
 {
+	stopTracking();
 }

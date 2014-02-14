@@ -34,6 +34,14 @@ class Communicator : public IImageReceiver, public ITrackerDataReceiver, public 
 		void receiveImage(cv::Mat* image, long int time, int type);
 		void receiveTrackingData(cv::Scalar direction, int id, long int time);
 		void calibrationFinished(cv::Mat* intrinsicsMatrix, cv::Mat* distortionCoefficients);
+		
+		/**
+		 * Sends a picture via ROS using the Picture topic.
+		 * 
+		 * @param data The image data.
+		 * @param timestamp The time the image was taken.
+		 * @param type The type of the image (0 for normal image, 1 for calibration image).
+		 */
 		void sendPicture(camera_application::Picture::_image_type &data, uint64_t timestamp, int type);
 
 	protected:

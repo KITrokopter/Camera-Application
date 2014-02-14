@@ -103,6 +103,8 @@ void Communicator::calibrationFinished(cv::Mat* intrinsicsMatrix, cv::Mat* disto
 	}
 	
 	cameraCalibrationDataPublisher.publish(msg);
+	
+	analyzer->clearCalibrationImages();
 }
 
 void Communicator::sendPicture(camera_application::Picture::_image_type &data, uint64_t timestamp, int type)

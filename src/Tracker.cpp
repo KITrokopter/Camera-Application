@@ -91,6 +91,11 @@ void Tracker::join()
 		this->image = 0;
 	}
 }
+
+bool Tracker::isStarted()
+{
+	return thread != 0;
+}
 	
 void Tracker::setNextImage(cv::Mat* image, long int time)
 {

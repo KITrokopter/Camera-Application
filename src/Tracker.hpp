@@ -41,10 +41,9 @@ public:
 	void start();
 	void stop();
 	void join();
+	bool isStarted();
 	
-	/*
-	 * Method: setNextImage
-	 * 
+	/**
 	 * Creates a copy of the given image and uses it for tracking as soon as it can.
 	 * The given image must already be undistorted.
 	 */
