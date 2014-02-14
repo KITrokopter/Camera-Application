@@ -6,16 +6,13 @@
 class IImageReceiver
 {
 public:
-	/*
-	 * Function: receiveImage
-	 * 
+	/**
 	 * Passes a copy of the received image.
 	 * The receiver has to delete the object.
 	 * 
-	 * Parameters:
-	 *   image* - The image.
-	 *   time - The time the image was taken.
-	 *   type - 0 for normal image, 1 for calibration image.
+	 * @param image The image.
+	 * @param time The time the image was taken.
+	 * @param type 0 for normal image, 1 for calibration image.
 	 */
 	virtual void receiveImage(cv::Mat* image, long int time, int type) = 0;
 };

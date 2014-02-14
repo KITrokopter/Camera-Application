@@ -78,7 +78,7 @@ int main(int argc, char** argv)
 	
 	std::cout << "Starting calibration" << std::endl;
 	
-	processor.addQuadcopter(new QuadcopterColor(245, 10, 120, 255, 100, 255, 0));
+	processor.addQuadcopter(new QuadcopterColor(249, 6, 140, 255, 120, 255, 0));
 // 	processor.addQuadcopter(new QuadcopterColor(95, 115, 20, 255, 20, 255, 1));
 	
 	processor.startCalibration(20, 500, 7, 7, 3, 3, &tc, 0);
