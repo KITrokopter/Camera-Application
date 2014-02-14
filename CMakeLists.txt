@@ -121,31 +121,31 @@ add_executable(camera_application_node
 target_link_libraries(camera_application_node ${catkin_LIBRARIES}
   libopencv_core.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so libcvblob.so libopencv_highgui.so
 )
-add_dependencies(camera_application_node camera_application_generate_messages_cpp)
+add_dependencies(camera_application_node camera_application_generate_messages_cpp api_application_generate_messages_cpp)
 
 add_executable(TestTakePicture test/TestTakePicture.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp src/profiling.cpp src/CvImageProcessor.cpp src/QuadcopterColor.cpp src/Tracker.cpp)
 target_link_libraries(TestTakePicture ${catkin_LIBRARIES}
   libopencv_core.so libopencv_highgui.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so libcvblob.so
 )
-add_dependencies(TestTakePicture camera_application_generate_messages_cpp)
+add_dependencies(TestTakePicture camera_application_generate_messages_cpp api_application_generate_messages_cpp)
 
 add_executable(TestCalibration test/TestCalibration.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp src/CvImageProcessor.cpp src/profiling.cpp src/QuadcopterColor.cpp src/Tracker.cpp)
 target_link_libraries(TestCalibration ${catkin_LIBRARIES}
   libopencv_core.so libopencv_highgui.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so libcvblob.so
 )
-add_dependencies(TestCalibration camera_application_generate_messages_cpp)
+add_dependencies(TestCalibration camera_application_generate_messages_cpp api_application_generate_messages_cpp)
 
 add_executable(TestTracker test/TestTracker.cpp src/Tracker.cpp src/QuadcopterColor.cpp src/Mutex.cpp src/profiling.cpp src/ImageAnalyzer.cpp src/CvImageProcessor.cpp src/CvKinect.cpp)
 target_link_libraries(TestTracker ${catkin_LIBRARIES}
   libopencv_core.so libopencv_imgproc.so libopencv_highgui.so libfreenect.so libopencv_calib3d.so libcvblob.so
 )
-add_dependencies(TestTracker camera_application_generate_messages_cpp)
+add_dependencies(TestTracker camera_application_generate_messages_cpp api_application_generate_messages_cpp)
 
 add_executable(TestTracking test/TestTracking.cpp src/CvKinect.cpp src/Mutex.cpp src/ImageAnalyzer.cpp src/CvImageProcessor.cpp src/QuadcopterColor.cpp src/Tracker.cpp src/profiling.cpp)
 target_link_libraries(TestTracking ${catkin_LIBRARIES}
   libopencv_core.so libopencv_imgproc.so libfreenect.so libopencv_calib3d.so libcvblob.so libopencv_highgui.so
 )
-add_dependencies(TestTracking camera_application_generate_messages_cpp)
+add_dependencies(TestTracking camera_application_generate_messages_cpp api_application_generate_messages_cpp)
 
 #############
 ## Install ##

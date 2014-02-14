@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 	Freenect::Freenect freenect;
 	CvKinect& device = freenect.createDevice<CvKinect>(0);
 	TestTracker tt;
-	CvImageProcessor processor(&device, &tt, true, false);
+	CvImageProcessor processor(&device, &tt, true, true);
 	TestCalibration tc;
 	
 	std::cout << "Starting calibration" << std::endl;
@@ -81,7 +81,7 @@ int main(int argc, char** argv)
 	processor.addQuadcopter(new QuadcopterColor(245, 10, 120, 255, 100, 255, 0));
 // 	processor.addQuadcopter(new QuadcopterColor(95, 115, 20, 255, 20, 255, 1));
 	
-	processor.startCalibration(5, 500, 7, 7, 3, 3, &tc, 0);
+	processor.startCalibration(20, 500, 7, 7, 3, 3, &tc, 0);
 	processor.waitForCalibration();
 	
 	processor.start();

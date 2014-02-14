@@ -17,11 +17,10 @@ Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
 	
 	api_application::Announce announce;
 	announce.request.type = 3; // 3 means position module
-	announce.request.initializeServiceName = std::string("InitializePositionModule");
 	
 	if (announceClient.call(announce))
 	{
-		id = announce.response.ID;
+		id = announce.response.id;
 	
 		if (id == ~0 /* -1 */)
 		{
@@ -186,14 +185,14 @@ void Communicator::handleCameraCalibrationData(
 void Communicator::handleSystem(
 		const api_application::System::Ptr &msg)
 {
-	if (msg.command == 1) {
+	if (msg->command == 1) {
 		// Start
 		
-		analyzer.startTracking();
-	} else if (msg.command == 2) {
+		analyzer->startTracking();
+	} else if (msg->command == 2) {
 		// Stop
 		
-		analyzer.stopTracking();
+		analyzer->stopTracking();
 		ros::shutdown();
 	}
 }
