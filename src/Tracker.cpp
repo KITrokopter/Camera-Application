@@ -130,7 +130,7 @@ void Tracker::drawCross(cv::Mat* mat, const int x, const int y)
 			
 			unsigned char color;
 			
-			if (i + j % 2 == 0) {
+			if (i + j % 3 > 0) {
 				color = 0xFF;
 			} else {
 				color = 0;
@@ -151,7 +151,7 @@ void Tracker::drawCross(cv::Mat* mat, const int x, const int y)
 		
 			unsigned char color;
 			
-			if (i + j % 2 == 0) {
+			if (i + j % 3 > 0) {
 				color = 0xFF;
 			} else {
 				color = 0;
@@ -317,7 +317,7 @@ cv::Mat* Tracker::createColorMapImage(cv::Mat* image) {
 	START_CLOCK(convertColorClock)
 	
 	cv::Mat* mapImage = new cv::Mat(image->size(), CV_8UC1);
-	cv::cvtColor(*image, *image, CV_RGB2HSV);
+	cv::cvtColor(*image, *image, CV_BGR2HSV);
 	
 	STOP_CLOCK(convertColorClock, "Converting colors took: ")
 	START_CLOCK(maskImageClock)
@@ -344,19 +344,23 @@ cv::Mat* Tracker::createColorMapImage(cv::Mat* image) {
 	source = image->data;
 	
 	if (minHue < maxHue) {
+		ROS_DEBUG("Hue inside.");
+		
 		for (current = mapImage->data; current < end; ++current, source += 3) {
 			//if (*source > maxHue || *source < minHue || *(++source) > maxSaturation || *source < minSaturation || *(++source) > maxValue || *(source++) < minValue) {
-			if (*source > maxHue || *(source) < minHue || *(source + 1) < minSaturation || *(source + 2) < minValue) {
+			if (*source > maxHue || *source < minHue || *(source + 1) < minSaturation || *(source + 2) < minValue) {
 				*current = 0;
 			} else {
 				*current = 255;
 			}
 		}
 	} else {
+		ROS_DEBUG("Hue outside.");
+		
 		// Hue interval inverted here.
 		for (current = mapImage->data; current < end; ++current, source += 3) {
 			//if (*source < maxHue || *source > minHue || *(++source) > maxSaturation || *source < minSaturation || *(++source) > maxValue || *(source++) < minValue) {
-			if (*source < maxHue || *(source) > minHue || *(source + 1) < minSaturation || *(source + 2) < minValue) {
+			if (*source < maxHue || *source > minHue || *(source + 1) < minSaturation || *(source + 2) < minValue) {
 				*current = 0;
 			} else {
 				*current = 255;
