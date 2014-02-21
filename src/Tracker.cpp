@@ -317,7 +317,15 @@ cv::Mat* Tracker::createColorMapImage(cv::Mat* image) {
 	START_CLOCK(convertColorClock)
 	
 	cv::Mat* mapImage = new cv::Mat(image->size(), CV_8UC1);
+	
+	// Debug HSV color range
+	unsigned char* element = image->data + image->step[0] * 240 + image->step[1] * 320;
+	ROS_DEBUG("R: %d G: %d B: %d", element[2], element[1], element[0]);
+	
 	cv::cvtColor(*image, *image, CV_BGR2HSV);
+	
+	// Debug HSV color range
+	ROS_DEBUG("H: %d S: %d V: %d", element[0], element[1], element[2]);
 	
 	STOP_CLOCK(convertColorClock, "Converting colors took: ")
 	START_CLOCK(maskImageClock)
@@ -344,8 +352,6 @@ cv::Mat* Tracker::createColorMapImage(cv::Mat* image) {
 	source = image->data;
 	
 	if (minHue < maxHue) {
-		ROS_DEBUG("Hue inside.");
-		
 		for (current = mapImage->data; current < end; ++current, source += 3) {
 			//if (*source > maxHue || *source < minHue || *(++source) > maxSaturation || *source < minSaturation || *(++source) > maxValue || *(source++) < minValue) {
 			if (*source > maxHue || *source < minHue || *(source + 1) < minSaturation || *(source + 2) < minValue) {
@@ -355,8 +361,6 @@ cv::Mat* Tracker::createColorMapImage(cv::Mat* image) {
 			}
 		}
 	} else {
-		ROS_DEBUG("Hue outside.");
-		
 		// Hue interval inverted here.
 		for (current = mapImage->data; current < end; ++current, source += 3) {
 			//if (*source < maxHue || *source > minHue || *(++source) > maxSaturation || *source < minSaturation || *(++source) > maxValue || *(source++) < minValue) {
