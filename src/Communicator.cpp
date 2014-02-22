@@ -134,10 +134,11 @@ bool Communicator::handleInitializeCameraService(
 		this->quadCopterIds = req.quadCopterIds;
 		
 		// Set quadcopters
-		for (int i = 0; i < this->hsvColorRanges.size(); i++)
+		for (int i = 0; i < this->quadCopterIds.size(); i++)
 		{
 			QuadcopterColor* color = new QuadcopterColor(hsvColorRanges[i * 2], hsvColorRanges[(i * 2) + 1], quadCopterIds[i]);
 			analyzer->addQuadcopter(color);
+			ROS_DEBUG("Added quadcopter: %s", color->toString().c_str());
 		}
 		
 		res.error = 0;

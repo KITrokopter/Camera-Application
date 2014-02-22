@@ -2,6 +2,7 @@
 #define QUADCOPTER_COLOR_HPP
 
 #include <opencv2/core/core.hpp>
+#include <string>
 
 class QuadcopterColor
 {
@@ -17,6 +18,7 @@ public:
 	cv::Scalar getMinColor();
 	cv::Scalar getMaxColor();
 	int getId();
+	std::string toString();
 };
 
 #endif // QUADCOPTER_COLOR_HPP

@@ -1,5 +1,7 @@
 #include "QuadcopterColor.hpp"
 
+#include <sstream>
+
 QuadcopterColor::QuadcopterColor(cv::Scalar minColor, cv::Scalar maxColor, int id)
 {
 	this->minColor = minColor;
@@ -41,4 +43,13 @@ cv::Scalar QuadcopterColor::getMaxColor()
 int QuadcopterColor::getId()
 {
 	return id;
+}
+
+std::string QuadcopterColor::toString()
+{
+	std::stringstream ss;
+	ss << "id: " << id << " H: " << minColor.val[0] << "-" << maxColor.val[0]
+					   << " S: " << minColor.val[1] << "-" << maxColor.val[1]
+					   << " V: " << minColor.val[2] << "-" << maxColor.val[2];
+	return ss.str();
 }

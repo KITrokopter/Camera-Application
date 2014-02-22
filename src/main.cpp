@@ -95,6 +95,7 @@ int main(int argc, char** argv)
 	
 	Freenect::Freenect freenect;
 	CvKinect& device = freenect.createDevice<CvKinect>(0);
+	// CvImageProcessor* analyzer = new CvImageProcessor(&device, 0, true, false);
 	CvImageProcessor* analyzer = new CvImageProcessor(&device, 0);
 	
 	// Do ROS stuff.
@@ -102,7 +103,7 @@ int main(int argc, char** argv)
 	analyzer->setDataReceiver(&comm);
 	analyzer->start();
 	
-	ROS_INFO("Initialized.");
+	ROS_INFO("Initialized Kinect.");
 	ros::spin();
 	ROS_INFO("Shutting down.");
 	

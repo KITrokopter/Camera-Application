@@ -57,9 +57,9 @@ void ImageAnalyzer::receiveImage(cv::Mat* image, long int time, int type)
 		delete lastImage;
 	}
 	
-	if (++imageReceivedCount % 150 == 0) {
-		ROS_DEBUG("Received %d images", imageReceivedCount);
-	}
+// 	if (++imageReceivedCount % 150 == 0) {
+// 		ROS_DEBUG("Received %d images", imageReceivedCount);
+// 	}
 	
 	lastImage = image;
 	lastImageTime = time;
