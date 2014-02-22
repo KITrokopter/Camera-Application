@@ -9,6 +9,7 @@ ImageAnalyzer::ImageAnalyzer(CvKinect* imageSource)
 	imageSource->addImageReceiver(this);
 	lastImage = 0;
 	videoStarted = false;
+	imageReceivedCount = 0;
 }
 
 void ImageAnalyzer::start()
@@ -54,6 +55,10 @@ void ImageAnalyzer::receiveImage(cv::Mat* image, long int time, int type)
 	
 	if (lastImage != 0) {
 		delete lastImage;
+	}
+	
+	if (++imageReceivedCount % 150 == 0) {
+		ROS_DEBUG("Received %d images", imageReceivedCount);
 	}
 	
 	lastImage = image;

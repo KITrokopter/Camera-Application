@@ -14,6 +14,7 @@ private:
 	Mutex imageMutex;
 	bool videoStarted;
 	CvKinect* imageSource;
+	int imageReceivedCount;
 	
 protected:
 	virtual void processImage(cv::Mat* image, long int time) = 0;

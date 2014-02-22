@@ -13,7 +13,7 @@ Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
 	ros::NodeHandle n;
 
 	// Advertise myself to API
-	ros::ServiceClient announceClient = n.serviceClient<api_application::Announce>("Announce");
+	ros::ServiceClient announceClient = n.serviceClient<api_application::Announce>("announce");
 	
 	api_application::Announce announce;
 	announce.request.type = 3; // 3 means position module
@@ -46,7 +46,7 @@ Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
 
 	// Subscribers
 	this->pictureSendingActivationSubscriber = n.subscribe("PictureSendingActivation", 1, &Communicator::handlePictureSendingActivation, this);
-	this->calibrateCameraSubscriber = n.subscribe("CalibrateCamera", 1, &Communicator::handleCalibrateCamera, this);
+	this->calibrateCameraSubscriber = n.subscribe("CalibrateCamera", 100, &Communicator::handleCalibrateCamera, this);
 	this->cameraCalibrationDataSubscriber = n.subscribe("CameraCalibrationData", 4, &Communicator::handleCameraCalibrationData, this);
 	this->systemSubscriber = n.subscribe("System", 2, &Communicator::handleSystem, this);
 
@@ -158,6 +158,8 @@ void Communicator::handleCalibrateCamera(
 		const camera_application::CalibrateCamera::Ptr &msg)
 {
 	if (msg->ID == this->id) {
+		ROS_DEBUG("Received calibration order for me");
+		
 		analyzer->startCalibration(msg->imageAmount, msg->imageDelay, msg->boardWidth, msg->boardHeight, msg->boardRectangleWidth, msg->boardRectangleHeight, this, this);
 	}
 }

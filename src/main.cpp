@@ -87,8 +87,11 @@ int main(int argc, char** argv)
 	strcat(nodeName, ip);
 	free(ip);
 	
-	// TODO: Create unique name.
 	ros::init(argc, argv, nodeName);
+	
+	if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) {
+		ros::console::notifyLoggerLevelsChanged();
+	}
 	
 	Freenect::Freenect freenect;
 	CvKinect& device = freenect.createDevice<CvKinect>(0);
@@ -101,10 +104,12 @@ int main(int argc, char** argv)
 	
 	ROS_INFO("Initialized.");
 	ros::spin();
+	ROS_INFO("Shutting down.");
 	
 	analyzer->stop();
 	
 	ros::shutdown();
+	std::cout << "ros::shutdown() sent" << std::endl;
 	
 	// Wait for ros to shutdown.
 	while (ros::ok()) {

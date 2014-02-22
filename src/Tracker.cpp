@@ -364,7 +364,7 @@ cv::Mat* Tracker::createColorMapImage(cv::Mat* image) {
 		// Hue interval inverted here.
 		for (current = mapImage->data; current < end; ++current, source += 3) {
 			//if (*source < maxHue || *source > minHue || *(++source) > maxSaturation || *source < minSaturation || *(++source) > maxValue || *(source++) < minValue) {
-			if (*source < maxHue || *source > minHue || *(source + 1) < minSaturation || *(source + 2) < minValue) {
+			if ((*source > maxHue && *source < minHue) || *(source + 1) < minSaturation || *(source + 2) < minValue) {
 				*current = 0;
 			} else {
 				*current = 255;
