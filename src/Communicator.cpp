@@ -153,6 +153,12 @@ void Communicator::handlePictureSendingActivation(
 		return;
 	
 	pictureSendingActivated = msg->active;
+	
+	if (pictureSendingActivated) {
+		ROS_DEBUG("Picture sending activated");
+	} else {
+		ROS_DEBUG("Picture sending deactivated");
+	}
 }
 
 void Communicator::handleCalibrateCamera(
