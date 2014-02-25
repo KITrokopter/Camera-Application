@@ -253,6 +253,10 @@ void CvImageProcessor::startTracking()
 		return;
 	}
 	
+	if (!isCalibrated()) {
+		ROS_ERROR("Cannot start tracking! Not calibrated!");
+	}
+	
 	for (std::vector<Tracker*>::iterator it = trackers.begin(); it != trackers.end(); it++) {
 		(*it)->start();
 	}
