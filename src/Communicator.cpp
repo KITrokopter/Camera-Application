@@ -80,7 +80,7 @@ void Communicator::receiveImage(cv::Mat* image, long int time, int type)
 void Communicator::receiveTrackingData(cv::Scalar direction, int id, long int time)
 {
 	camera_application::RawPosition pos;
-	pos.ID = id;
+	pos.ID = this->id;
 	pos.timestamp = time;
 	pos.xPosition = direction[0];
 	pos.yPosition = direction[1];
