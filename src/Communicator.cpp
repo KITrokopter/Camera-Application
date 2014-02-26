@@ -16,7 +16,7 @@ Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
 	ros::ServiceClient announceClient = n.serviceClient<api_application::Announce>("announce");
 	
 	api_application::Announce announce;
-	announce.request.type = 3; // 3 means position module
+	announce.request.type = 0; // 0 means camera module
 	
 	if (announceClient.call(announce))
 	{
