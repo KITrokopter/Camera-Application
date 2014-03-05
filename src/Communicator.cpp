@@ -77,14 +77,14 @@ void Communicator::receiveImage(cv::Mat* image, long int time, int type)
 	delete image;
 }
 
-void Communicator::receiveTrackingData(cv::Scalar direction, int id, long int time)
+void Communicator::receiveTrackingData(cv::Scalar direction, int quadcopterId, long int time)
 {
 	camera_application::RawPosition pos;
 	pos.ID = this->id;
 	pos.timestamp = time;
 	pos.xPosition = direction[0];
 	pos.yPosition = direction[1];
-	pos.quadcopterId = id;
+	pos.quadcopterId = quadcopterId;
 	
 	rawPositionPublisher.publish(pos);
 }
@@ -129,7 +129,6 @@ bool Communicator::handleInitializeCameraService(
 	} else {
 		ROS_INFO("Initializing camera %u.", req.ID);
 		this->initialized = true;
-		this->id = req.ID;
 		this->hsvColorRanges = req.hsvColorRanges;
 		this->quadCopterIds = req.quadCopterIds;
 		
