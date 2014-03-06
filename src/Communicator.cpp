@@ -29,7 +29,7 @@ Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
 		}
 		else
 		{
-			ROS_INFO("Position module successfully announced. Got id %d", id);
+			ROS_INFO("Camera module successfully announced. Got id %d", id);
 		}
 	}
 	else
