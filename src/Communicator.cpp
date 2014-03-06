@@ -60,10 +60,16 @@ Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
 	
 	pictureNumber = 0;
 	pictureSendingActivated = false;
+	firstPictureReceived = false;
 }
 
 void Communicator::receiveImage(cv::Mat* image, long int time, int type)
 {
+	if (!firstPictureReceived) {
+		ROS_DEBUG("Received image. Kinect seems to be working");
+		firstPictureReceived = true;
+	}
+	
 	if (pictureSendingActivated) {
 		camera_application::Picture::_image_type data;
 		

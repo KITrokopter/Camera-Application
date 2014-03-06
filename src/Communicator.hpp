@@ -79,6 +79,7 @@ class Communicator : public IImageReceiver, public ITrackerDataReceiver, public 
 		// Initialization data
 		bool initialized;
 		bool pictureSendingActivated;
+		bool firstPictureReceived;
 		uint32_t id;
 		uint32_t pictureNumber;
 		std::vector<uint32_t> hsvColorRanges;
