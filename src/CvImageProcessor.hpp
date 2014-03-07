@@ -168,6 +168,11 @@ public:
 	void removeQuadcopter(int id);
 	
 	/**
+	 * Removes all quadcopters.
+	 */
+	void removeAllQuadcopters();
+	
+	/**
 	 * Starts the tracking process.
 	 */
 	void startTracking();

@@ -130,24 +130,24 @@ bool Communicator::handleInitializeCameraService(
 		camera_application::InitializeCameraService::Response &res)
 {
 	if (this->initialized) {
-		ROS_ERROR("initialize_camera called twice, ignoring.");
-		res.error = 1;
-	} else {
-		ROS_INFO("Initializing camera %u.", id);
-		this->initialized = true;
-		this->hsvColorRanges = req.hsvColorRanges;
-		this->quadCopterIds = req.quadCopterIds;
-		
-		// Set quadcopters
-		for (int i = 0; i < this->quadCopterIds.size(); i++)
-		{
-			QuadcopterColor* color = new QuadcopterColor(hsvColorRanges[i * 2], hsvColorRanges[(i * 2) + 1], quadCopterIds[i]);
-			analyzer->addQuadcopter(color);
-			ROS_DEBUG("Added quadcopter: %s", color->toString().c_str());
-		}
-		
-		res.error = 0;
+		analyzer->removeAllQuadcopters();
 	}
+	
+	ROS_INFO("Initializing camera %u.", id);
+	this->initialized = true;
+	this->hsvColorRanges = req.hsvColorRanges;
+	this->quadCopterIds = req.quadCopterIds;
+	
+	// Set quadcopters
+	for (int i = 0; i < this->quadCopterIds.size(); i++)
+	{
+		QuadcopterColor* color = new QuadcopterColor(hsvColorRanges[i * 2], hsvColorRanges[(i * 2) + 1], quadCopterIds[i]);
+		analyzer->addQuadcopter(color);
+		ROS_DEBUG("Added quadcopter: %s", color->toString().c_str());
+	}
+	
+	res.error = 0;
+	
 	return true;
 }
 

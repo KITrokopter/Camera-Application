@@ -306,7 +306,16 @@ void CvImageProcessor::removeQuadcopter(int id)
 		if ((*it)->getQuadcopterColor()->getId() == id) {
 			delete *it;
 			trackers.erase(it);
+			return;
 		}
+	}
+}
+
+void CvImageProcessor::removeAllQuadcopters()
+{
+	while (trackers.size() > 0) {
+		delete trackers.back();
+		trackers.pop_back();
 	}
 }
 
