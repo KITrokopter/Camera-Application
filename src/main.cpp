@@ -1,5 +1,6 @@
 #include <opencv2/core/core.hpp>
 #include <iostream>
+#include <cstdlib>
 #include <unistd.h>
 #include <sys/types.h>
 #include <ifaddrs.h>
@@ -118,4 +119,5 @@ int main(int argc, char** argv)
 	}
 	
 	std::cout << "Camera Application successfully terminated" << std::endl;
+	exit(0);
 }
