@@ -269,7 +269,7 @@ void Tracker::executeTracker()
 			
 			// Set (0, 0) to center.
 			x -= 320;
-			y = 240 - y;
+			y -= 240;
 			ROS_DEBUG("Center: %lf/%lf", x, y);
 			
 			// Apply scaling
