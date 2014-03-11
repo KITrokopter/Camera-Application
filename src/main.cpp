@@ -102,6 +102,9 @@ int main(int argc, char** argv)
 	// Do ROS stuff.
 	Communicator comm(&device, analyzer);
 	analyzer->setDataReceiver(&comm);
+	
+	// Wait one second to give Kinect time to initialize.
+	usleep(1000000);
 	analyzer->start();
 	
 	ROS_INFO("Initialized Kinect.");
