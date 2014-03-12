@@ -24,9 +24,10 @@ private:
 	Mutex imageMutex;
 	ITrackerDataReceiver* dataReceiver;
 	
-	bool visualTracker;
-	bool useMaskedImage;
-	std::string windowName;
+	bool showCameraImage;
+	bool showMaskedImage;
+	std::string maskedWindowName;
+	std::string cameraWindowName;
 	
 	// Methods
 	void executeTracker();
@@ -35,7 +36,7 @@ private:
 	
 public:
 	Tracker(ITrackerDataReceiver* dataReceiver, QuadcopterColor* color);
-	Tracker(ITrackerDataReceiver* dataReceiver, QuadcopterColor* color, bool visualTracker, bool useMaskedImage);
+	Tracker(ITrackerDataReceiver* dataReceiver, QuadcopterColor* color, bool showCameraImage, bool showMaskedImage);
 	~Tracker();
 	
 	void start();

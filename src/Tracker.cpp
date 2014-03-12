@@ -26,25 +26,33 @@ Tracker::Tracker(ITrackerDataReceiver* dataReceiver, QuadcopterColor* color)
 	this->image = 0;
 	this->qc = color;
 	
-	this->visualTracker = false;
-	this->useMaskedImage = false;
+	this->showCameraImage = false;
+	this->showMaskedImage = false;
 }
 
-Tracker::Tracker(ITrackerDataReceiver* dataReceiver, QuadcopterColor* color, bool visualTracker, bool useMaskedImage)
+Tracker::Tracker(ITrackerDataReceiver* dataReceiver, QuadcopterColor* color, bool showCameraImage, bool showMaskedImage)
 {
 	this->dataReceiver = dataReceiver;
 	this->thread = 0;
 	this->image = 0;
 	this->qc = color;
 	
-	this->visualTracker = visualTracker;
-	this->useMaskedImage = useMaskedImage;
+	this->showCameraImage = showCameraImage;
+	this->showMaskedImage = showMaskedImage;
 	
-	if (visualTracker) {
+	if (showMaskedImage) {
 		std::stringstream ss;
-		ss << "Tracker of id " << ((QuadcopterColor*) this->qc)->getId();
+		ss << "Tracker of id " << ((QuadcopterColor*) this->qc)->getId() << " showing masked image";
 		
-		this->windowName = ss.str();
+		this->maskedWindowName = ss.str();
+		cv::startWindowThread();
+	}
+	
+	if (showCameraImage) {
+		std::stringstream ss;
+		ss << "Tracker of id " << ((QuadcopterColor*) this->qc)->getId() << " showing camera image";
+		
+		this->cameraWindowName = ss.str();
 		cv::startWindowThread();
 	}
 }
@@ -59,8 +67,12 @@ void Tracker::start()
 		throw new std::runtime_error("Already started. (Maybe you forgot to call join?)");
 	}
 	
-	if (visualTracker) {
-		cv::namedWindow(windowName);
+	if (showMaskedImage) {
+		cv::namedWindow(maskedWindowName);
+	}
+	
+	if (showCameraImage) {
+		cv::namedWindow(cameraWindowName);
 	}
 	
 	imageDirty = false;
@@ -194,11 +206,12 @@ void Tracker::executeTracker()
 		imageDirty = false;
 		imageMutex.unlock();
 		
-		cv::Mat* visualImage = 0;
+		cv::Mat* cameraImage = 0;
+		cv::Mat* maskedImage = 0;
 		
-		if (visualTracker && !useMaskedImage) {
-			visualImage = new cv::Mat(image->size(), image->type());
-			image->copyTo(*visualImage);
+		if (showCameraImage) {
+			cameraImage = new cv::Mat(image->size(), image->type());
+			image->copyTo(*cameraImage);
 		}
 		
 		#ifdef QC_DEBUG_TRACKER
@@ -208,15 +221,15 @@ void Tracker::executeTracker()
 		
 		cv::Mat* mapImage = createColorMapImage(image);
 		
-		if (visualTracker && useMaskedImage) {
+		if (showMaskedImage) {
 			// Convert to 3 channel image.
-			visualImage = new cv::Mat(cv::Size(640, 480), CV_8UC3);
+			maskedImage = new cv::Mat(cv::Size(640, 480), CV_8UC3);
 			int target = 0;
 		
 			for (int i = 0; i < mapImage->total(); ++i) {
-				visualImage->data[target++] = mapImage->data[i];
-				visualImage->data[target++] = mapImage->data[i];
-				visualImage->data[target++] = mapImage->data[i];
+				maskedImage->data[target++] = mapImage->data[i];
+				maskedImage->data[target++] = mapImage->data[i];
+				maskedImage->data[target++] = mapImage->data[i];
 			}
 		}
 		
@@ -236,7 +249,7 @@ void Tracker::executeTracker()
 		ROS_DEBUG("Blob result: %d", result);
 		
 		// Filter blobs
-		cvFilterByArea(blobs, 25, 1000000);
+		cvFilterByArea(blobs, 10, 1000000);
 		
 		#ifdef QC_DEBUG_TRACKER
 		IplImage iplImage = *image;
@@ -250,14 +263,28 @@ void Tracker::executeTracker()
 		ROS_DEBUG("Exiting debug block"); // TODO Tracking down issue #7
 		#endif
 		
-		if (visualTracker) {
-			IplImage iplImage = *visualImage;
-			cvRenderBlobs(labelImg, blobs, &iplImage, &iplImage, CV_BLOB_RENDER_BOUNDING_BOX);
-			cvb::CvTracks tracks;
+		cvb::CvTracks tracks;
+		
+		if (showCameraImage || showMaskedImage) {
 			cvUpdateTracks(blobs, tracks, 200., 5);
+		}
+		
+		if (showMaskedImage) {
+			IplImage iplImage = *maskedImage;
+			cvRenderBlobs(labelImg, blobs, &iplImage, &iplImage, CV_BLOB_RENDER_BOUNDING_BOX);
 			cvRenderTracks(tracks, &iplImage, &iplImage, CV_TRACK_RENDER_ID | CV_TRACK_RENDER_BOUNDING_BOX);
+			ROS_DEBUG("Exiting visual masked block"); // TODO Tracking down issue #7
+		}
+		
+		if (showCameraImage) {
+			IplImage iplImage = *cameraImage;
+			cvRenderBlobs(labelImg, blobs, &iplImage, &iplImage, CV_BLOB_RENDER_BOUNDING_BOX);
+			cvRenderTracks(tracks, &iplImage, &iplImage, CV_TRACK_RENDER_ID | CV_TRACK_RENDER_BOUNDING_BOX);
+			ROS_DEBUG("Exiting visual masked block"); // TODO Tracking down issue #7
+		}
+		
+		if (showCameraImage || showMaskedImage) {
 			cvReleaseTracks(tracks);
-			ROS_DEBUG("Exiting visual block"); // TODO Tracking down issue #7
 		}
 		
 		if (blobs.size() != 0) {
@@ -278,8 +305,12 @@ void Tracker::executeTracker()
 			
 			dataReceiver->receiveTrackingData(cv::Scalar(x, y, 1.0), ((QuadcopterColor*) qc)->getId(), time);
 			
-			if (visualTracker) {
-				drawCross(visualImage, center.x, center.y);
+			if (showMaskedImage) {
+				drawCross(maskedImage, center.x, center.y);
+			}
+			
+			if (showCameraImage) {
+				drawCross(cameraImage, center.x, center.y);
 			}
 		}
 		
@@ -289,11 +320,18 @@ void Tracker::executeTracker()
 		
 		ROS_DEBUG("cvb stuff freed"); // TODO Tracking down issue #7
 		
-		if (visualTracker) {
-			cv::imshow(windowName, *visualImage);
-			delete visualImage;
+		if (showMaskedImage) {
+			cv::imshow(maskedWindowName, *maskedImage);
+			delete maskedImage;
 			
-			ROS_DEBUG("showed visual image"); // TODO Tracking down issue #7
+			ROS_DEBUG("showed masked image"); // TODO Tracking down issue #7
+		}
+		
+		if (showCameraImage) {
+			cv::imshow(cameraWindowName, *cameraImage);
+			delete cameraImage;
+			
+			ROS_DEBUG("showed camera image"); // TODO Tracking down issue #7
 		}
 		
 		delete mapImage;
@@ -306,8 +344,12 @@ void Tracker::executeTracker()
 	cv::destroyWindow("Tracker");
 	#endif
 	
-	if (visualTracker) {
-		cv::destroyWindow(windowName);
+	if (showMaskedImage) {
+		cv::destroyWindow(maskedWindowName);
+	}
+	
+	if (showCameraImage) {
+		cv::destroyWindow(cameraWindowName);
 	}
 	
 	ROS_INFO("Tracker with id %d terminated", ((QuadcopterColor*) this->qc)->getId());

@@ -38,8 +38,8 @@ private:
 	// Tracking
 	std::vector<Tracker*> trackers;
 	bool isTracking;
-	bool visualTracker;
-	bool useMaskedImage;
+	bool showCameraImage;
+	bool showMaskedImage;
 	
 	// Methods
 	std::vector<cv::Point3f>* createObjectPoints();
@@ -63,7 +63,7 @@ public:
 	 * @param useMaskedImage If the color masked image or the original image should be shown.
 	 *                       Only has an effect if useMaskedImage is set to true.
 	 */
-	CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* dataReceiver, bool visualTracker, bool useMaskedImage);
+	CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* dataReceiver, bool showCameraImage, bool showMaskedImage);
 	
 	void processImage(cv::Mat* image, long int time);
 	

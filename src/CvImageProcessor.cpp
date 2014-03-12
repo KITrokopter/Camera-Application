@@ -12,11 +12,11 @@ CvImageProcessor::CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* 
 	this->dataReceiver = dataReceiver;
 	this->calibrationImageReceiver = 0;
 	this->isTracking = false;
-	this->visualTracker = false;
-	this->useMaskedImage = false;
+	this->showCameraImage = false;
+	this->showMaskedImage = false;
 }
 
-CvImageProcessor::CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* dataReceiver, bool visualTracker, bool useMaskedImage)
+CvImageProcessor::CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* dataReceiver, bool showCameraImage, bool showMaskedImage)
 : ImageAnalyzer::ImageAnalyzer(imageSource)
 {
 	this->intrinsicsMatrix = 0;
@@ -25,8 +25,8 @@ CvImageProcessor::CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* 
 	this->dataReceiver = dataReceiver;
 	this->calibrationImageReceiver = 0;
 	this->isTracking = false;
-	this->visualTracker = visualTracker;
-	this->useMaskedImage = useMaskedImage;
+	this->showCameraImage = showCameraImage;
+	this->showMaskedImage = showMaskedImage;
 }
 
 void CvImageProcessor::setIntrinsicsMatrix(cv::Mat* intrinsicsMatrix)
@@ -296,7 +296,7 @@ void CvImageProcessor::setDataReceiver(ITrackerDataReceiver* receiver)
 
 void CvImageProcessor::addQuadcopter(QuadcopterColor* qc)
 {
-	Tracker* tracker = new Tracker(dataReceiver, qc, visualTracker, useMaskedImage);
+	Tracker* tracker = new Tracker(dataReceiver, qc, showCameraImage, showMaskedImage);
 	trackers.push_back(tracker);
 }
 
