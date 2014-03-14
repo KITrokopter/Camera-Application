@@ -84,7 +84,7 @@ void Communicator::receiveImage(cv::Mat* image, long int time, int type)
 	delete image;
 }
 
-void Communicator::recevierUndistortedImage(cv::Mat *image, long int time){
+void Communicator::receiveUndistortedImage(cv::Mat *image, long int time){
 	if (pictureSendingActivated && analyzer->isCalibrated()) {
 		camera_application::Picture::_image_type data;
 		
