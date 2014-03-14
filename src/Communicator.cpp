@@ -57,6 +57,7 @@ Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
 
 	// Listen to the camera.
 	device->addImageReceiver(this);
+	analyzer->setUndistortedImageReceiver(this);
 	
 	pictureNumber = 0;
 	pictureSendingActivated = false;
@@ -70,7 +71,7 @@ void Communicator::receiveImage(cv::Mat* image, long int time, int type)
 		firstPictureReceived = true;
 	}
 	
-	if (pictureSendingActivated) {
+	if (pictureSendingActivated && !analyzer->isCalibrated()) {
 		camera_application::Picture::_image_type data;
 		
 		for (size_t i = 0; i < (640 * 480 * 3); i++) {
@@ -78,6 +79,20 @@ void Communicator::receiveImage(cv::Mat* image, long int time, int type)
 		}
 		
 		this->sendPicture(data, (uint64_t)time, type);
+	}
+	
+	delete image;
+}
+
+void Communicator::receiveUndistortedImage(cv::Mat *image, long int time){
+	if (pictureSendingActivated && analyzer->isCalibrated()) {
+		camera_application::Picture::_image_type data;
+		
+		for (size_t i = 0; i < (640 * 480 * 3); i++) {
+			data[i] = image->data[i];
+		}
+		
+		this->sendPicture(data, (uint64_t)time, 0);
 	}
 	
 	delete image;
