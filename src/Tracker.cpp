@@ -361,13 +361,13 @@ cv::Mat* Tracker::createColorMapImage(cv::Mat* image) {
 	cv::Mat* mapImage = new cv::Mat(image->size(), CV_8UC1);
 	
 	// Debug HSV color range
-	unsigned char* element = image->data + image->step[0] * 240 + image->step[1] * 320;
-	ROS_DEBUG("R: %d G: %d B: %d", element[2], element[1], element[0]);
+	// unsigned char* element = image->data + image->step[0] * 240 + image->step[1] * 320;
+	// ROS_DEBUG("R: %d G: %d B: %d", element[2], element[1], element[0]);
 	
 	cv::cvtColor(*image, *image, CV_BGR2HSV);
 	
 	// Debug HSV color range
-	ROS_DEBUG("H: %d S: %d V: %d", element[0], element[1], element[2]);
+	// ROS_DEBUG("H: %d S: %d V: %d", element[0], element[1], element[2]);
 	
 	STOP_CLOCK(convertColorClock, "Converting colors took: ")
 	START_CLOCK(maskImageClock)

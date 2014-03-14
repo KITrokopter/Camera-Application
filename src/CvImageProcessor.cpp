@@ -11,6 +11,7 @@ CvImageProcessor::CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* 
 	this->calibrationThread = 0;
 	this->dataReceiver = dataReceiver;
 	this->calibrationImageReceiver = 0;
+	this->undistortedImageReceiver = 0;
 	this->isTracking = false;
 	this->showCameraImage = false;
 	this->showMaskedImage = false;
@@ -24,6 +25,7 @@ CvImageProcessor::CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* 
 	this->calibrationThread = 0;
 	this->dataReceiver = dataReceiver;
 	this->calibrationImageReceiver = 0;
+	this->undistortedImageReceiver = 0;
 	this->isTracking = false;
 	this->showCameraImage = showCameraImage;
 	this->showMaskedImage = showMaskedImage;
@@ -228,20 +230,29 @@ void CvImageProcessor::startCalibration(int imageAmount, int imageDelay, int boa
 
 void CvImageProcessor::processImage(cv::Mat* image, long int time)
 {
+	cv::Mat* undistorted = 0;
+	
+	if (isCalibrated() && (isTracking || undistortedImageReceiver != 0)) {
+		undistorted = undistortImage(image);
+	}
+	
 	if (isTracking) {
-		ROS_DEBUG("Processing image");
-		
-		cv::Mat* undistorted = undistortImage(image);
-		
-		ROS_DEBUG("Image successfully undistorted");
-		
 		for (std::vector<Tracker*>::iterator it = trackers.begin(); it != trackers.end(); it++) {
 			(*it)->setNextImage(undistorted, time);
 		}
 		
-		delete undistorted;
-		
 		ROS_DEBUG("Processing image shared between %ld threads", trackers.size());
+	}
+	
+	if (undistortedImageReceiver != 0) {
+		cv::Mat *toSend = new cv::Mat(image->size(), image->type());
+		image->copyTo(*toSend);
+		
+		undistortedImageReceiver->receiveUndistortedImage(toSend, time);
+	}
+	
+	if (undistorted != 0) {
+		delete undistorted;
 	}
 	
 	delete image;
@@ -337,6 +348,11 @@ void CvImageProcessor::abortCalibration()
 bool CvImageProcessor::isCalibrated()
 {
 	return intrinsicsMatrix != 0 && distortionCoefficients != 0;
+}
+
+void CvImageProcessor::setUndistortedImageReceiver(IUndistortedImageReceiver *receiver)
+{
+	undistortedImageReceiver = receiver;
 }
 
 CvImageProcessor::~CvImageProcessor()

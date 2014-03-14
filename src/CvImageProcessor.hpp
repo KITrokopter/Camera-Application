@@ -11,6 +11,7 @@
 #include "IImageReceiver.hpp"
 #include "CvKinect.hpp"
 #include "ICalibrationFinishedListener.hpp"
+#include "IUndistortedImageReceiver.hpp"
 
 class CvImageProcessor : public ImageAnalyzer
 {
@@ -18,6 +19,7 @@ private:
 	IImageReceiver* calibrationImageReceiver;
 	ICalibrationFinishedListener* calibrationFinishedListener;
 	ITrackerDataReceiver* dataReceiver;
+	IUndistortedImageReceiver *undistortedImageReceiver;
 	
 	std::vector<cv::Scalar> colorRanges;
 	cv::Mat* intrinsicsMatrix;
@@ -184,8 +186,17 @@ public:
 	
 	/**
 	 * Sets the receiver for the calculated quadcopter vectors.
+	 * 
+	 * @param receiver The receiver.
 	 */
 	void setDataReceiver(ITrackerDataReceiver* receiver);
+	
+	/**
+	 * Sets the receiver for the undistorted images.
+	 * 
+	 * @param receiver The receiver.
+	 */
+	void setUndistortedImageReceiver(IUndistortedImageReceiver *receiver);
 	
 	/**
 	 * Default destructor, ensures that all threads are stopped.
