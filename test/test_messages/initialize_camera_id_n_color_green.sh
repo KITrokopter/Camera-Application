@@ -1,1 +1,1 @@
-rosservice call /InitializeCameraService$1 "{header: auto, hsvColorRanges: [3182978, 4653055], quadCopterIds: [1]}"
+rosservice call /InitializeCameraService$1 "{header: auto, hsvColorRanges: [2652260, 5177343], quadCopterIds: [1]}"
