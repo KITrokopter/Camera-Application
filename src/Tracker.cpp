@@ -318,7 +318,7 @@ void Tracker::executeTracker()
 		cvReleaseBlobs(blobs);
 		cvReleaseImage(&labelImg);
 		
-		ROS_DEBUG("cvb stuff freed"); // TODO Tracking down issue #7
+		// ROS_DEBUG("cvb stuff freed"); // TODO Tracking down issue #7
 		
 		if (showMaskedImage) {
 			cv::imshow(maskedWindowName, *maskedImage);
