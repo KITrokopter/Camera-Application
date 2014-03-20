@@ -241,7 +241,7 @@ void CvImageProcessor::processImage(cv::Mat* image, long int time)
 			(*it)->setNextImage(undistorted, time);
 		}
 		
-		ROS_DEBUG("Processing image shared between %ld threads", trackers.size());
+		// ROS_DEBUG("Processing image shared between %ld threads", trackers.size());
 	}
 	
 	if (undistortedImageReceiver != 0) {

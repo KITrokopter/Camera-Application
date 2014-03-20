@@ -4,7 +4,7 @@
 #include <time.h>
 
 // Use this to output profiling information.
-#define QC_PROFILE
+//#define QC_PROFILE
 
 #ifdef QC_PROFILE
 
