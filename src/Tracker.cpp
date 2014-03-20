@@ -75,7 +75,7 @@ void Tracker::start()
 		cv::namedWindow(cameraWindowName);
 	}
 	
-	imageDirty = false;
+	imageDirty = 0;
 	stopFlag = false;
 	
 	thread = new boost::thread(boost::bind(&Tracker::executeTracker, this));
@@ -119,7 +119,7 @@ void Tracker::setNextImage(cv::Mat* image, long int time)
 	
 	this->image = new cv::Mat(*image);
 	imageTime = time;
-	imageDirty = true;
+	imageDirty++;
 	
 	imageMutex.unlock();
 }
@@ -195,6 +195,8 @@ void Tracker::executeTracker()
 		if (!imageDirty) {
 			usleep(100);
 			continue;
+		} else if (imageDirty > 1) {
+			ROS_WARN("Skipped %d frames!", imageDirty - 1);
 		}
 		
 		START_CLOCK(trackerClock)
@@ -203,7 +205,7 @@ void Tracker::executeTracker()
 		cv::Mat* image = (cv::Mat*) this->image;
 		image = new cv::Mat(*image);
 		long int time = this->imageTime;
-		imageDirty = false;
+		imageDirty = 0;
 		imageMutex.unlock();
 		
 		cv::Mat* cameraImage = 0;

@@ -20,7 +20,7 @@ private:
 	volatile QuadcopterColor* qc;
 	volatile cv::Mat* image;
 	volatile long int imageTime;
-	volatile bool imageDirty;
+	volatile int imageDirty;
 	Mutex imageMutex;
 	ITrackerDataReceiver* dataReceiver;
 	
