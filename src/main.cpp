@@ -1,5 +1,6 @@
 #include <opencv2/core/core.hpp>
 #include <iostream>
+#include <cstdlib>
 #include <unistd.h>
 #include <sys/types.h>
 #include <ifaddrs.h>
@@ -95,12 +96,15 @@ int main(int argc, char** argv)
 	
 	Freenect::Freenect freenect;
 	CvKinect& device = freenect.createDevice<CvKinect>(0);
-	// CvImageProcessor* analyzer = new CvImageProcessor(&device, 0, true, false);
-	CvImageProcessor* analyzer = new CvImageProcessor(&device, 0);
+	CvImageProcessor* analyzer = new CvImageProcessor(&device, 0, false, false);
+// 	CvImageProcessor* analyzer = new CvImageProcessor(&device, 0);
 	
 	// Do ROS stuff.
 	Communicator comm(&device, analyzer);
 	analyzer->setDataReceiver(&comm);
+	
+	// Wait one second to give Kinect time to initialize.
+	usleep(1000000);
 	analyzer->start();
 	
 	ROS_INFO("Initialized Kinect.");
@@ -118,4 +122,5 @@ int main(int argc, char** argv)
 	}
 	
 	std::cout << "Camera Application successfully terminated" << std::endl;
+	exit(0);
 }

@@ -29,7 +29,7 @@ Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
 		}
 		else
 		{
-			ROS_INFO("Position module successfully announced. Got id %d", id);
+			ROS_INFO("Camera module successfully announced. Got id %d", id);
 		}
 	}
 	else
@@ -57,14 +57,21 @@ Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer):
 
 	// Listen to the camera.
 	device->addImageReceiver(this);
+	analyzer->setUndistortedImageReceiver(this);
 	
 	pictureNumber = 0;
 	pictureSendingActivated = false;
+	firstPictureReceived = false;
 }
 
 void Communicator::receiveImage(cv::Mat* image, long int time, int type)
 {
-	if (pictureSendingActivated) {
+	if (!firstPictureReceived) {
+		ROS_DEBUG("Received image. Kinect seems to be working");
+		firstPictureReceived = true;
+	}
+	
+	if (pictureSendingActivated && !analyzer->isCalibrated()) {
 		camera_application::Picture::_image_type data;
 		
 		for (size_t i = 0; i < (640 * 480 * 3); i++) {
@@ -72,6 +79,20 @@ void Communicator::receiveImage(cv::Mat* image, long int time, int type)
 		}
 		
 		this->sendPicture(data, (uint64_t)time, type);
+	}
+	
+	delete image;
+}
+
+void Communicator::receiveUndistortedImage(cv::Mat *image, long int time){
+	if (pictureSendingActivated && analyzer->isCalibrated()) {
+		camera_application::Picture::_image_type data;
+		
+		for (size_t i = 0; i < (640 * 480 * 3); i++) {
+			data[i] = image->data[i];
+		}
+		
+		this->sendPicture(data, (uint64_t)time, 0);
 	}
 	
 	delete image;
@@ -124,24 +145,24 @@ bool Communicator::handleInitializeCameraService(
 		camera_application::InitializeCameraService::Response &res)
 {
 	if (this->initialized) {
-		ROS_ERROR("initialize_camera called twice, ignoring.");
-		res.error = 1;
-	} else {
-		ROS_INFO("Initializing camera %u.", id);
-		this->initialized = true;
-		this->hsvColorRanges = req.hsvColorRanges;
-		this->quadCopterIds = req.quadCopterIds;
-		
-		// Set quadcopters
-		for (int i = 0; i < this->quadCopterIds.size(); i++)
-		{
-			QuadcopterColor* color = new QuadcopterColor(hsvColorRanges[i * 2], hsvColorRanges[(i * 2) + 1], quadCopterIds[i]);
-			analyzer->addQuadcopter(color);
-			ROS_DEBUG("Added quadcopter: %s", color->toString().c_str());
-		}
-		
-		res.error = 0;
+		analyzer->removeAllQuadcopters();
 	}
+	
+	ROS_INFO("Initializing camera %u.", id);
+	this->initialized = true;
+	this->hsvColorRanges = req.hsvColorRanges;
+	this->quadCopterIds = req.quadCopterIds;
+	
+	// Set quadcopters
+	for (int i = 0; i < this->quadCopterIds.size(); i++)
+	{
+		QuadcopterColor* color = new QuadcopterColor(hsvColorRanges[i * 2], hsvColorRanges[(i * 2) + 1], quadCopterIds[i]);
+		analyzer->addQuadcopter(color);
+		ROS_DEBUG("Added quadcopter: %s", color->toString().c_str());
+	}
+	
+	res.error = 0;
+	
 	return true;
 }
 

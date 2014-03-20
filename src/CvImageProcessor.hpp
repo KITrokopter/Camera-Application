@@ -11,6 +11,7 @@
 #include "IImageReceiver.hpp"
 #include "CvKinect.hpp"
 #include "ICalibrationFinishedListener.hpp"
+#include "IUndistortedImageReceiver.hpp"
 
 class CvImageProcessor : public ImageAnalyzer
 {
@@ -18,6 +19,7 @@ private:
 	IImageReceiver* calibrationImageReceiver;
 	ICalibrationFinishedListener* calibrationFinishedListener;
 	ITrackerDataReceiver* dataReceiver;
+	IUndistortedImageReceiver *undistortedImageReceiver;
 	
 	std::vector<cv::Scalar> colorRanges;
 	cv::Mat* intrinsicsMatrix;
@@ -38,8 +40,8 @@ private:
 	// Tracking
 	std::vector<Tracker*> trackers;
 	bool isTracking;
-	bool visualTracker;
-	bool useMaskedImage;
+	bool showCameraImage;
+	bool showMaskedImage;
 	
 	// Methods
 	std::vector<cv::Point3f>* createObjectPoints();
@@ -63,7 +65,7 @@ public:
 	 * @param useMaskedImage If the color masked image or the original image should be shown.
 	 *                       Only has an effect if useMaskedImage is set to true.
 	 */
-	CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* dataReceiver, bool visualTracker, bool useMaskedImage);
+	CvImageProcessor(CvKinect* imageSource, ITrackerDataReceiver* dataReceiver, bool showCameraImage, bool showMaskedImage);
 	
 	void processImage(cv::Mat* image, long int time);
 	
@@ -168,6 +170,11 @@ public:
 	void removeQuadcopter(int id);
 	
 	/**
+	 * Removes all quadcopters.
+	 */
+	void removeAllQuadcopters();
+	
+	/**
 	 * Starts the tracking process.
 	 */
 	void startTracking();
@@ -179,8 +186,17 @@ public:
 	
 	/**
 	 * Sets the receiver for the calculated quadcopter vectors.
+	 * 
+	 * @param receiver The receiver.
 	 */
 	void setDataReceiver(ITrackerDataReceiver* receiver);
+	
+	/**
+	 * Sets the receiver for the undistorted images.
+	 * 
+	 * @param receiver The receiver.
+	 */
+	void setUndistortedImageReceiver(IUndistortedImageReceiver *receiver);
 	
 	/**
 	 * Default destructor, ensures that all threads are stopped.

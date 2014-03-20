@@ -27,13 +27,15 @@
  *
  * Provides communication with ROS.
  */
-class Communicator : public IImageReceiver, public ITrackerDataReceiver, public ICalibrationFinishedListener {
+class Communicator : public IImageReceiver, public ITrackerDataReceiver,
+					 public ICalibrationFinishedListener, public IUndistortedImageReceiver {
 	public:
 		Communicator(CvKinect *device, CvImageProcessor *analyzer);
 
-		void receiveImage(cv::Mat* image, long int time, int type);
+		void receiveImage(cv::Mat *image, long int time, int type);
 		void receiveTrackingData(cv::Scalar direction, int id, long int time);
-		void calibrationFinished(cv::Mat* intrinsicsMatrix, cv::Mat* distortionCoefficients);
+		void calibrationFinished(cv::Mat *intrinsicsMatrix, cv::Mat *distortionCoefficients);
+		void receiveUndistortedImage(cv::Mat *image, long int time);
 		
 		/**
 		 * Sends a picture via ROS using the Picture topic.
@@ -80,6 +82,7 @@ class Communicator : public IImageReceiver, public ITrackerDataReceiver, public 
 		// Initialization data
 		bool initialized;
 		bool pictureSendingActivated;
+		bool firstPictureReceived;
 		uint32_t id;
 		uint32_t pictureNumber;
 		std::vector<uint32_t> hsvColorRanges;
