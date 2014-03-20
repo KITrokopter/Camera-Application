@@ -191,6 +191,8 @@ void Tracker::executeTracker()
 	double horizontalScalingFactor = tan(57 * PI / 180) / 320;
 	ROS_DEBUG("Scaling factors: %lf/%lf", horizontalScalingFactor, verticalScalingFactor);
 	
+	bool quadcopterTracked = false;
+	
 	while (!stopFlag) {
 		if (!imageDirty) {
 			usleep(100);
@@ -248,7 +250,7 @@ void Tracker::executeTracker()
 		IplImage *labelImg = cvCreateImage(image->size(), IPL_DEPTH_LABEL, 1);
 		IplImage iplMapImage = *mapImage;
 		unsigned int result = cvLabel(&iplMapImage, labelImg, blobs);
-		ROS_DEBUG("Blob result: %d", result);
+		// ROS_DEBUG("Blob result: %d", result);
 		
 		// Filter blobs
 		cvFilterByArea(blobs, 10, 1000000);
@@ -299,7 +301,7 @@ void Tracker::executeTracker()
 			// Set (0, 0) to center.
 			x -= 320;
 			y -= 240;
-			ROS_DEBUG("Center: %lf/%lf", x, y);
+			//ROS_DEBUG("Center: %lf/%lf", x, y);
 			
 			// Apply scaling
 			x *= horizontalScalingFactor;
@@ -314,6 +316,14 @@ void Tracker::executeTracker()
 			if (showCameraImage) {
 				drawCross(cameraImage, center.x, center.y);
 			}
+			
+			if (!quadcopterTracked) {
+				quadcopterTracked = true;
+				ROS_DEBUG("Quadcopter tracked");
+			}
+		} else if (quadcopterTracked) {
+			quadcopterTracked = false;
+			ROS_DEBUG("Quadcopter NOT tracked");
 		}
 		
 		// Free cvb stuff.
