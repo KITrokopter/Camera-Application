@@ -116,11 +116,11 @@ void Communicator::calibrationFinished(cv::Mat* intrinsicsMatrix, cv::Mat* disto
 	msg.createdByCamera = true;
 	
 	for (int i = 0; i < 9; i++) {
-		msg.intrinsics[i] = intrinsicsMatrix->data[i];
+		msg.intrinsics[i] = intrinsicsMatrix->at(i);
 	}
 	
 	for (int i = 0; i < 4; i++) {
-		msg.distortion[i] = distortionCoefficients->data[i];
+		msg.distortion[i] = distortionCoefficients->at(i);
 	}
 	
 	cameraCalibrationDataPublisher.publish(msg);
@@ -199,14 +199,14 @@ void Communicator::handleCameraCalibrationData(
 		cv::Mat distortionCoefficients(cv::Size(5, 1), CV_64F);
 		
 		for (int i = 0; i < 9; i++) {
-			intrinsicsMatrix.data[i] = msg->intrinsics[i];
+			intrinsicsMatrix.at(i) = msg->intrinsics[i];
 		}
 		
 		for (int i = 0; i < 4; i++) {
-			distortionCoefficients.data[i] = msg->distortion[i];
+			distortionCoefficients.at(i) = msg->distortion[i];
 		}
 		
-		distortionCoefficients.data[4] = 0;
+		distortionCoefficients.at(4) = 0;
 		
 		analyzer->setIntrinsicsMatrix(&intrinsicsMatrix);
 		analyzer->setDistortionCoefficients(&distortionCoefficients);
