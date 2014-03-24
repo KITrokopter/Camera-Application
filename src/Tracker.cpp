@@ -207,8 +207,10 @@ void Tracker::executeTracker()
 		imageCount++;
 		
 		if (imageCount == 100) {
-			ROS_DEBUG("Throughput: %.2f images/s", imageCountTime / 1.0e9 / imageCount);
+			long int currentTime = getNanoTime();
+			ROS_DEBUG("Throughput: %.2f images/s", (currentTime - imageCountTime) / 1.0e9 / imageCount);
 			imageCount = 0;
+			imageCountTime = currentTime;
 		}
 		
 		START_CLOCK(trackerClock)
