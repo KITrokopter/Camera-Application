@@ -206,7 +206,7 @@ void Communicator::handleCameraCalibrationData(
 			distortionCoefficients.at<double>(i) = msg->distortion[i];
 		}
 		
-				distortionCoefficients.at<double>(4) = 0;
+		distortionCoefficients.at<double>(4) = 0;
 		
 		analyzer->setIntrinsicsMatrix(&intrinsicsMatrix);
 		analyzer->setDistortionCoefficients(&distortionCoefficients);
