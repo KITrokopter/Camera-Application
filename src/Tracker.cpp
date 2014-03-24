@@ -193,24 +193,12 @@ void Tracker::executeTracker()
 	
 	bool quadcopterTracked = false;
 	
-	int imageCount = 0;
-	long int imageCountTime = getNanoTime();
-	
 	while (!stopFlag) {
 		if (imageDirty == 0) {
 			usleep(100);
 			continue;
 		} else if (imageDirty > 1) {
 			ROS_WARN("Skipped %d frames!", imageDirty - 1);
-		}
-		
-		imageCount++;
-		
-		if (imageCount == 100) {
-			long int currentTime = getNanoTime();
-			ROS_DEBUG("Throughput: %.2f images/s", imageCount * 1.0e9 / (currentTime - imageCountTime));
-			imageCount = 0;
-			imageCountTime = currentTime;
 		}
 		
 		START_CLOCK(trackerClock)

@@ -13,6 +13,9 @@ CvKinect::CvKinect(freenect_context *_ctx, int _index)
 		v = std::pow(v, 3) * 6;
 		m_gamma[i] = v * 6 * 256;
 	}
+	
+	imageCount = 0;
+	imageCountTime = -1;
 }
 
 // Do not call directly even in child
@@ -26,8 +29,20 @@ void CvKinect::VideoCallback(void* _rgb, uint32_t timestamp)
 	m_rgb_mutex.unlock();
 	
 	long int time = getNanoTime();
-	cv::Mat* image = new cv::Mat(cv::Size(640,480), CV_8UC3);
+	cv::Mat* image = new cv::Mat(cv::Size(640, 480), CV_8UC3);
 	getVideo(*image);
+	
+	imageCount++;
+	
+	if (imageCountTime == -1) {
+		imageCountTime = time;
+	}
+	
+	if (imageCount == 100) {
+		ROS_DEBUG("Throughput: %.2f images/s", imageCount * 1.0e9 / (time - imageCountTime));
+		imageCount = 0;
+		imageCountTime = time;
+	}
 	
 	for (std::vector<IImageReceiver*>::iterator it = imageReceivers.begin(); it != imageReceivers.end(); it++) {
 		cv::Mat* imageCopy = new cv::Mat(*image);
