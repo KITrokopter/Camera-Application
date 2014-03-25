@@ -194,7 +194,7 @@ void Tracker::executeTracker()
 	bool quadcopterTracked = false;
 	
 	while (!stopFlag) {
-		if (!imageDirty) {
+		if (imageDirty == 0) {
 			usleep(100);
 			continue;
 		} else if (imageDirty > 1) {

@@ -4,7 +4,7 @@
 #include <vector>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <vector>
+#include <ros/console.h>
 
 #include "libfreenect.hpp"
 #include "Mutex.hpp"
@@ -43,6 +43,9 @@ class CvKinect : public Freenect::FreenectDevice
 		Mutex m_depth_mutex;
 		bool m_new_rgb_frame;
 		bool m_new_depth_frame;
+		
+		int imageCount;
+		long int imageCountTime;
 		
 		std::vector<IImageReceiver*> imageReceivers;
 };

@@ -74,7 +74,8 @@ class Communicator : public IImageReceiver, public ITrackerDataReceiver,
 		ros::Publisher picturePublisher;
 		ros::Publisher rawPositionPublisher;
 		ros::Publisher cameraCalibrationDataPublisher;
-
+		
+		// Tracking
 		CvKinect *device;
 		CvImageProcessor *analyzer;
 
