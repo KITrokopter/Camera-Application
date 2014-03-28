@@ -204,8 +204,8 @@ void Tracker::executeTracker()
 		START_CLOCK(trackerClock)
 		
 		imageMutex.lock();
-		cv::Mat* image = (cv::Mat*) this->image;
-		image = new cv::Mat(*image);
+		cv::Mat* image = new cv::Mat(image->size(), image->type());
+		((cv::Mat*) this->image)->copyTo(*image);
 		long int time = this->imageTime;
 		imageDirty = 0;
 		imageMutex.unlock();
