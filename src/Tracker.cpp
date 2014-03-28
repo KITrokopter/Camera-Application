@@ -319,11 +319,11 @@ void Tracker::executeTracker()
 			
 			if (!quadcopterTracked) {
 				quadcopterTracked = true;
-				ROS_DEBUG("Quadcopter tracked");
+				ROS_DEBUG("Quadcopter %d tracked", ((QuadcopterColor*) this->qc)->getId());
 			}
 		} else if (quadcopterTracked) {
 			quadcopterTracked = false;
-			ROS_DEBUG("Quadcopter NOT tracked");
+			ROS_DEBUG("Quadcopter %d NOT tracked", ((QuadcopterColor*) this->qc)->getId());
 		}
 		
 		// Free cvb stuff.
