@@ -253,7 +253,7 @@ void Tracker::executeTracker()
 		// ROS_DEBUG("Blob result: %d", result);
 		
 		// Filter blobs
-		cvFilterByArea(blobs, 10, 1000000);
+		cvFilterByArea(blobs, 6, 1000000);
 		
 		#ifdef QC_DEBUG_TRACKER
 		IplImage iplImage = *image;
@@ -319,11 +319,11 @@ void Tracker::executeTracker()
 			
 			if (!quadcopterTracked) {
 				quadcopterTracked = true;
-				ROS_DEBUG("Quadcopter tracked");
+				ROS_DEBUG("Quadcopter %d tracked", ((QuadcopterColor*) this->qc)->getId());
 			}
 		} else if (quadcopterTracked) {
 			quadcopterTracked = false;
-			ROS_DEBUG("Quadcopter NOT tracked");
+			ROS_DEBUG("Quadcopter %d NOT tracked", ((QuadcopterColor*) this->qc)->getId());
 		}
 		
 		// Free cvb stuff.
