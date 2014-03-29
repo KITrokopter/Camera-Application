@@ -252,7 +252,7 @@ void Tracker::executeTracker()
 		// ROS_DEBUG("Blob result: %d", result);
 		
 		// Filter blobs
-		cvFilterByArea(blobs, 6, 1000000);
+		cvFilterByArea(blobs, 10, 1000000);
 		
 		#ifdef QC_DEBUG_TRACKER
 		IplImage iplImage = image;
