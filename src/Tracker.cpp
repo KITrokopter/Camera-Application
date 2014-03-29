@@ -129,7 +129,7 @@ QuadcopterColor* Tracker::getQuadcopterColor()
 	return (QuadcopterColor*) qc;
 }
 
-void Tracker::drawCross(cv::Mat* mat, const int x, const int y)
+void Tracker::drawCross(cv::Mat mat, const int x, const int y)
 {
 	ROS_DEBUG("Drawing cross.");
 	
@@ -137,8 +137,8 @@ void Tracker::drawCross(cv::Mat* mat, const int x, const int y)
 		int j = y;
 		
 // 		ROS_DEBUG("i/j: %d/%d", i, j);
-		if (i >= 0 && i < mat->rows && j >= 0 && j < mat->cols) {
-			unsigned char* element = mat->data + mat->step[0] * j + mat->step[1] * i;
+		if (i >= 0 && i < mat.rows && j >= 0 && j < mat.cols) {
+			unsigned char* element = mat.data + mat.step[0] * j + mat.step[1] * i;
 			
 			unsigned char color;
 			
@@ -158,8 +158,8 @@ void Tracker::drawCross(cv::Mat* mat, const int x, const int y)
 		int i = x;
 		
 // 		ROS_DEBUG("i/j: %d/%d", i, j);
-		if (i >= 0 && i < mat->rows && j >= 0 && j < mat->cols) {
-			unsigned char* element = mat->data + mat->step[0] * j + mat->step[1] * i;
+		if (i >= 0 && i < mat.rows && j >= 0 && j < mat.cols) {
+			unsigned char* element = mat.data + mat.step[0] * j + mat.step[1] * i;
 		
 			unsigned char color;
 			
@@ -204,51 +204,50 @@ void Tracker::executeTracker()
 		START_CLOCK(trackerClock)
 		
 		imageMutex.lock();
-		cv::Mat* image = new cv::Mat(image->size(), image->type());
-		((cv::Mat*) this->image)->copyTo(*image);
+		cv::Mat image = *((cv::Mat*) this->image);
 		long int time = this->imageTime;
 		imageDirty = 0;
 		imageMutex.unlock();
 		
-		cv::Mat* cameraImage = 0;
-		cv::Mat* maskedImage = 0;
+		cv::Mat cameraImage;
+		cv::Mat maskedImage;
 		
 		if (showCameraImage) {
-			cameraImage = new cv::Mat(image->size(), image->type());
-			image->copyTo(*cameraImage);
+			cameraImage = cv::Mat(image);
+			image.copyTo(cameraImage);
 		}
 		
 		#ifdef QC_DEBUG_TRACKER
-		cv::imshow("Tracker", *image);
+		cv::imshow("Tracker", image);
 		cv::waitKey(100000);
 		#endif
 		
-		cv::Mat* mapImage = createColorMapImage(image);
+		cv::Mat mapImage = createColorMapImage(image);
 		
 		if (showMaskedImage) {
 			// Convert to 3 channel image.
-			maskedImage = new cv::Mat(cv::Size(640, 480), CV_8UC3);
+			maskedImage = cv::Mat(cv::Size(640, 480), CV_8UC3);
 			int target = 0;
 		
-			for (int i = 0; i < mapImage->total(); ++i) {
-				maskedImage->data[target++] = mapImage->data[i];
-				maskedImage->data[target++] = mapImage->data[i];
-				maskedImage->data[target++] = mapImage->data[i];
+			for (int i = 0; i < mapImage.total(); ++i) {
+				maskedImage.data[target++] = mapImage.data[i];
+				maskedImage.data[target++] = mapImage.data[i];
+				maskedImage.data[target++] = mapImage.data[i];
 			}
 		}
 		
 		#ifdef QC_DEBUG_TRACKER
-		cv::imshow("Tracker", *mapImage);
+		cv::imshow("Tracker", mapImage);
 		cv::waitKey(100000);
 		#endif
 		
 		cv::Mat morphKernel = cv::getStructuringElement(CV_SHAPE_RECT, cv::Size(5, 5));
-		cv::morphologyEx(*mapImage, *mapImage, cv::MORPH_OPEN, morphKernel);
+		cv::morphologyEx(mapImage, mapImage, cv::MORPH_OPEN, morphKernel);
 		
 		// Finding blobs
 		cvb::CvBlobs blobs;
-		IplImage *labelImg = cvCreateImage(image->size(), IPL_DEPTH_LABEL, 1);
-		IplImage iplMapImage = *mapImage;
+		IplImage *labelImg = cvCreateImage(image.size(), IPL_DEPTH_LABEL, 1);
+		IplImage iplMapImage = mapImage;
 		unsigned int result = cvLabel(&iplMapImage, labelImg, blobs);
 		// ROS_DEBUG("Blob result: %d", result);
 		
@@ -256,7 +255,7 @@ void Tracker::executeTracker()
 		cvFilterByArea(blobs, 6, 1000000);
 		
 		#ifdef QC_DEBUG_TRACKER
-		IplImage iplImage = *image;
+		IplImage iplImage = image;
 		cvRenderBlobs(labelImg, blobs, &iplImage, &iplImage, CV_BLOB_RENDER_BOUNDING_BOX);
 		cvb::CvTracks tracks;
 		cvUpdateTracks(blobs, tracks, 200., 5);
@@ -274,14 +273,14 @@ void Tracker::executeTracker()
 		}
 		
 		if (showMaskedImage) {
-			IplImage iplImage = *maskedImage;
+			IplImage iplImage = maskedImage;
 			cvRenderBlobs(labelImg, blobs, &iplImage, &iplImage, CV_BLOB_RENDER_BOUNDING_BOX);
 			cvRenderTracks(tracks, &iplImage, &iplImage, CV_TRACK_RENDER_ID | CV_TRACK_RENDER_BOUNDING_BOX);
 			ROS_DEBUG("Exiting visual masked block"); // TODO Tracking down issue #7
 		}
 		
 		if (showCameraImage) {
-			IplImage iplImage = *cameraImage;
+			IplImage iplImage = cameraImage;
 			cvRenderBlobs(labelImg, blobs, &iplImage, &iplImage, CV_BLOB_RENDER_BOUNDING_BOX);
 			cvRenderTracks(tracks, &iplImage, &iplImage, CV_TRACK_RENDER_ID | CV_TRACK_RENDER_BOUNDING_BOX);
 			ROS_DEBUG("Exiting visual masked block"); // TODO Tracking down issue #7
@@ -333,21 +332,16 @@ void Tracker::executeTracker()
 		// ROS_DEBUG("cvb stuff freed"); // TODO Tracking down issue #7
 		
 		if (showMaskedImage) {
-			cv::imshow(maskedWindowName, *maskedImage);
-			delete maskedImage;
+			cv::imshow(maskedWindowName, maskedImage);
 			
 			ROS_DEBUG("showed masked image"); // TODO Tracking down issue #7
 		}
 		
 		if (showCameraImage) {
-			cv::imshow(cameraWindowName, *cameraImage);
-			delete cameraImage;
+			cv::imshow(cameraWindowName, cameraImage);
 			
 			ROS_DEBUG("showed camera image"); // TODO Tracking down issue #7
 		}
-		
-		delete mapImage;
-		delete image;
 		
 		STOP_CLOCK(trackerClock, "Calculation of quadcopter position took: ")
 	}
@@ -367,16 +361,19 @@ void Tracker::executeTracker()
 	ROS_INFO("Tracker with id %d terminated", ((QuadcopterColor*) this->qc)->getId());
 }
 
-cv::Mat* Tracker::createColorMapImage(cv::Mat* image) {
+cv::Mat Tracker::createColorMapImage(cv::Mat image) {
 	START_CLOCK(convertColorClock)
 	
-	cv::Mat* mapImage = new cv::Mat(image->size(), CV_8UC1);
+	cv::Mat mapImage = cv::Mat(image.size(), CV_8UC1);
+	cv::Mat hsvImage = cv::Mat(image);
+	mapImage.reserve(480);
+	hsvImage.release();
 	
 	// Debug HSV color range
 	// unsigned char* element = image->data + image->step[0] * 240 + image->step[1] * 320;
 	// ROS_DEBUG("R: %d G: %d B: %d", element[2], element[1], element[0]);
 	
-	cv::cvtColor(*image, *image, CV_BGR2HSV);
+	cv::cvtColor(image, hsvImage, CV_BGR2HSV);
 	
 	// Debug HSV color range
 	// ROS_DEBUG("H: %d S: %d V: %d", element[0], element[1], element[2]);
@@ -402,11 +399,11 @@ cv::Mat* Tracker::createColorMapImage(cv::Mat* image) {
 	minValue = color->getMinColor().val[2];
 	//maxValue = color->getMaxColor().val[2]; // unused
 	
-	end = mapImage->data + mapImage->size().width * mapImage->size().height;
-	source = image->data;
+	end = mapImage.data + mapImage.size().width * mapImage.size().height;
+	source = hsvImage.data;
 	
 	if (minHue < maxHue) {
-		for (current = mapImage->data; current < end; ++current, source += 3) {
+		for (current = mapImage.data; current < end; ++current, source += 3) {
 			//if (*source > maxHue || *source < minHue || *(++source) > maxSaturation || *source < minSaturation || *(++source) > maxValue || *(source++) < minValue) {
 			if (*source > maxHue || *source < minHue || *(source + 1) < minSaturation || *(source + 2) < minValue) {
 				*current = 0;
@@ -416,7 +413,7 @@ cv::Mat* Tracker::createColorMapImage(cv::Mat* image) {
 		}
 	} else {
 		// Hue interval inverted here.
-		for (current = mapImage->data; current < end; ++current, source += 3) {
+		for (current = mapImage.data; current < end; ++current, source += 3) {
 			//if (*source < maxHue || *source > minHue || *(++source) > maxSaturation || *source < minSaturation || *(++source) > maxValue || *(source++) < minValue) {
 			if ((*source > maxHue && *source < minHue) || *(source + 1) < minSaturation || *(source + 2) < minValue) {
 				*current = 0;

@@ -31,8 +31,8 @@ private:
 	
 	// Methods
 	void executeTracker();
-	cv::Mat* createColorMapImage(cv::Mat* image);
-	void drawCross(cv::Mat* mat, int i, int j);
+	cv::Mat createColorMapImage(cv::Mat image);
+	void drawCross(cv::Mat mat, int i, int j);
 	
 public:
 	Tracker(ITrackerDataReceiver* dataReceiver, QuadcopterColor* color);
