@@ -169,7 +169,7 @@ bool Communicator::handleInitializeCameraService(
 void Communicator::handlePictureSendingActivation(
 		const camera_application::PictureSendingActivation::Ptr &msg)
 {
-	if (msg->ID != this->id && msg->ID != 0)
+	if (msg->ID != this->id && !msg->global)
 		return;
 	
 	pictureSendingActivated = msg->active;
