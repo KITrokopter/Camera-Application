@@ -200,6 +200,7 @@ void Tracker::executeTracker()
 	IplImage *labelImg = cvCreateImage(image.size(), IPL_DEPTH_LABEL, 1);
 	cv::Mat morphKernel = cv::getStructuringElement(CV_SHAPE_RECT, cv::Size(5, 5));
 	cvb::CvTracks tracks;
+	IplImage iplMapImage;
 	
 	while (!stopFlag) {
 		if (imageDirty == 0) {
@@ -238,7 +239,7 @@ void Tracker::executeTracker()
 		
 		// Finding blobs
 		// Only copies headers.
-		IplImage iplMapImage = mapImage;
+		iplMapImage = mapImage;
 		unsigned int result = cvLabel(&iplMapImage, labelImg, blobs);
 		// ROS_DEBUG("Blob result: %d", result);
 		
@@ -271,7 +272,7 @@ void Tracker::executeTracker()
 		
 		if (blobs.size() != 0) {
 			// Find biggest blob
-			cvb::CvLabel largestBlob =  cvLargestBlob(blobs);
+			cvb::CvLabel largestBlob = cvLargestBlob(blobs);
 			CvPoint2D64f center = blobs.find(largestBlob)->second->centroid;
 			double x = center.x;
 			double y = center.y;
