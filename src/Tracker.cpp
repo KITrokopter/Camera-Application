@@ -180,11 +180,6 @@ void Tracker::drawCross(cv::Mat mat, const int x, const int y)
 
 void Tracker::executeTracker()
 {
-	#ifdef QC_DEBUG_TRACKER
-	cv::startWindowThread();
-	cv::namedWindow("Tracker");
-	#endif
-	
 	#define PI (3.1415926535897932384626433832795028841)
 	// Kinect fow: 43° vertical, 57° horizontal
 	double verticalScalingFactor = tan(43 * PI / 180) / 240;
@@ -192,6 +187,19 @@ void Tracker::executeTracker()
 	ROS_DEBUG("Scaling factors: %lf/%lf", horizontalScalingFactor, verticalScalingFactor);
 	
 	bool quadcopterTracked = false;
+	
+	// Images
+	cv::Mat cameraImage(cv::Size(640, 480), CV_8UC3);
+	cv::Mat maskedImage(cv::Size(640, 480), CV_8UC3);
+	cv::Mat image(cv::Size(640, 480), CV_8UC3);
+	cv::Mat mapImage(cv::Size(640, 480), CV_8UC1);
+	cv::Mat hsvImage(cv::Size(640, 480), CV_8UC3);
+	
+	// CvBlob
+	cvb::CvBlobs blobs;
+	IplImage *labelImg = cvCreateImage(image.size(), IPL_DEPTH_LABEL, 1);
+	cv::Mat morphKernel = cv::getStructuringElement(CV_SHAPE_RECT, cv::Size(5, 5));
+	cvb::CvTracks tracks;
 	
 	while (!stopFlag) {
 		if (imageDirty == 0) {
@@ -204,29 +212,19 @@ void Tracker::executeTracker()
 		START_CLOCK(trackerClock)
 		
 		imageMutex.lock();
-		cv::Mat image = *((cv::Mat*) this->image);
+		((cv::Mat*) this->image)->copyTo(image);
 		long int time = this->imageTime;
 		imageDirty = 0;
 		imageMutex.unlock();
 		
-		cv::Mat cameraImage;
-		cv::Mat maskedImage;
-		
 		if (showCameraImage) {
-			cameraImage = cv::Mat(image);
 			image.copyTo(cameraImage);
 		}
 		
-		#ifdef QC_DEBUG_TRACKER
-		cv::imshow("Tracker", image);
-		cv::waitKey(100000);
-		#endif
-		
-		cv::Mat mapImage = createColorMapImage(image);
+		createColorMapImage(image, mapImage, hsvImage);
 		
 		if (showMaskedImage) {
 			// Convert to 3 channel image.
-			maskedImage = cv::Mat(cv::Size(640, 480), CV_8UC3);
 			int target = 0;
 		
 			for (int i = 0; i < mapImage.total(); ++i) {
@@ -236,17 +234,10 @@ void Tracker::executeTracker()
 			}
 		}
 		
-		#ifdef QC_DEBUG_TRACKER
-		cv::imshow("Tracker", mapImage);
-		cv::waitKey(100000);
-		#endif
-		
-		cv::Mat morphKernel = cv::getStructuringElement(CV_SHAPE_RECT, cv::Size(5, 5));
 		cv::morphologyEx(mapImage, mapImage, cv::MORPH_OPEN, morphKernel);
 		
 		// Finding blobs
-		cvb::CvBlobs blobs;
-		IplImage *labelImg = cvCreateImage(image.size(), IPL_DEPTH_LABEL, 1);
+		// Only copies headers.
 		IplImage iplMapImage = mapImage;
 		unsigned int result = cvLabel(&iplMapImage, labelImg, blobs);
 		// ROS_DEBUG("Blob result: %d", result);
@@ -254,25 +245,12 @@ void Tracker::executeTracker()
 		// Filter blobs
 		cvFilterByArea(blobs, 10, 1000000);
 		
-		#ifdef QC_DEBUG_TRACKER
-		IplImage iplImage = image;
-		cvRenderBlobs(labelImg, blobs, &iplImage, &iplImage, CV_BLOB_RENDER_BOUNDING_BOX);
-		cvb::CvTracks tracks;
-		cvUpdateTracks(blobs, tracks, 200., 5);
-		cvRenderTracks(tracks, &iplImage, &iplImage, CV_TRACK_RENDER_ID | CV_TRACK_RENDER_BOUNDING_BOX);
-		cv::imshow("Tracker", cv::Mat(&iplImage));
-		cv::waitKey(100000);
-		cvReleaseTracks(tracks);
-		ROS_DEBUG("Exiting debug block"); // TODO Tracking down issue #7
-		#endif
-		
-		cvb::CvTracks tracks;
-		
 		if (showCameraImage || showMaskedImage) {
 			cvUpdateTracks(blobs, tracks, 200., 5);
 		}
 		
 		if (showMaskedImage) {
+			// Only copies headers.
 			IplImage iplImage = maskedImage;
 			cvRenderBlobs(labelImg, blobs, &iplImage, &iplImage, CV_BLOB_RENDER_BOUNDING_BOX);
 			cvRenderTracks(tracks, &iplImage, &iplImage, CV_TRACK_RENDER_ID | CV_TRACK_RENDER_BOUNDING_BOX);
@@ -280,6 +258,7 @@ void Tracker::executeTracker()
 		}
 		
 		if (showCameraImage) {
+			// Only copies headers.
 			IplImage iplImage = cameraImage;
 			cvRenderBlobs(labelImg, blobs, &iplImage, &iplImage, CV_BLOB_RENDER_BOUNDING_BOX);
 			cvRenderTracks(tracks, &iplImage, &iplImage, CV_TRACK_RENDER_ID | CV_TRACK_RENDER_BOUNDING_BOX);
@@ -327,7 +306,6 @@ void Tracker::executeTracker()
 		
 		// Free cvb stuff.
 		cvReleaseBlobs(blobs);
-		cvReleaseImage(&labelImg);
 		
 		// ROS_DEBUG("cvb stuff freed"); // TODO Tracking down issue #7
 		
@@ -346,9 +324,7 @@ void Tracker::executeTracker()
 		STOP_CLOCK(trackerClock, "Calculation of quadcopter position took: ")
 	}
 	
-	#ifdef QC_DEBUG_TRACKER
-	cv::destroyWindow("Tracker");
-	#endif
+	cvReleaseImage(&labelImg);
 	
 	if (showMaskedImage) {
 		cv::destroyWindow(maskedWindowName);
@@ -361,13 +337,10 @@ void Tracker::executeTracker()
 	ROS_INFO("Tracker with id %d terminated", ((QuadcopterColor*) this->qc)->getId());
 }
 
-cv::Mat Tracker::createColorMapImage(cv::Mat image) {
+cv::Mat Tracker::createColorMapImage(cv::Mat& image, cv::Mat& mapImage, cv::Mat& hsvImage)
+{
 	START_CLOCK(convertColorClock)
-	
-	cv::Mat mapImage = cv::Mat(image.size(), CV_8UC1);
-	cv::Mat hsvImage = cv::Mat(image);
 	mapImage.reserve(480);
-	hsvImage.release();
 	
 	// Debug HSV color range
 	// unsigned char* element = image->data + image->step[0] * 240 + image->step[1] * 320;
