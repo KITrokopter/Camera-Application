@@ -6,27 +6,26 @@
 #include "IImageReceiver.hpp"
 #include "Mutex.hpp"
 
-class ImageAnalyzer : public IImageReceiver
-{
+class ImageAnalyzer : public IImageReceiver {
 private:
-	cv::Mat* lastImage;
+	cv::Mat *lastImage;
 	long int lastImageTime;
 	Mutex imageMutex;
 	bool videoStarted;
-	CvKinect* imageSource;
+	CvKinect *imageSource;
 	int imageReceivedCount;
-	
+
 protected:
-	virtual void processImage(cv::Mat* image, long int time) = 0;
-	
+	virtual void processImage(cv::Mat *image, long int time) = 0;
+
 public:
-	ImageAnalyzer(CvKinect* imageSource);
+	ImageAnalyzer(CvKinect *imageSource);
 	void start();
 	void stop();
 	bool isStarted();
 	cv::Mat* getImage();
-	void receiveImage(cv::Mat* image, long int time, int type);
-	
+	void receiveImage(cv::Mat *image, long int time, int type);
+
 	~ImageAnalyzer();
 };
 
