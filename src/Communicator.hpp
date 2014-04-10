@@ -22,10 +22,11 @@
 #include "camera_application/CameraCalibrationData.h" // Also subscriber
 
 
-/*
- * Class: Communicator
- *
+/**
  * Provides communication with ROS.
+ * 
+ * @author Sebastian Schmidt
+ * @author Lukas Werling
  */
 class Communicator : public IImageReceiver, public ITrackerDataReceiver,
 					 public ICalibrationFinishedListener, public IUndistortedImageReceiver {
@@ -37,13 +38,6 @@ class Communicator : public IImageReceiver, public ITrackerDataReceiver,
 		void calibrationFinished(cv::Mat *intrinsicsMatrix, cv::Mat *distortionCoefficients);
 		void receiveUndistortedImage(cv::Mat *image, long int time);
 		
-		/**
-		 * Sends a picture via ROS using the Picture topic.
-		 * 
-		 * @param data The image data.
-		 * @param timestamp The time the image was taken.
-		 * @param type The type of the image (0 for normal image, 1 for calibration image).
-		 */
 		void sendPicture(camera_application::Picture::_image_type &data, uint64_t timestamp, int type);
 
 	protected:
