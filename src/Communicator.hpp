@@ -29,7 +29,6 @@
  * @author Lukas Werling
  */
 class Communicator : public IImageReceiver, public ITrackerDataReceiver,
-<<<<<<< HEAD
 					 public ICalibrationFinishedListener, public IUndistortedImageReceiver {
 	public:
 		Communicator(CvKinect *device, CvImageProcessor *analyzer);
