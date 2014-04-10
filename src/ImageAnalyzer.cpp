@@ -3,7 +3,7 @@
 
 #include <ros/console.h>
 
-ImageAnalyzer::ImageAnalyzer(CvKinect* imageSource)
+ImageAnalyzer::ImageAnalyzer(CvKinect *imageSource)
 {
 	this->imageSource = imageSource;
 	imageSource->addImageReceiver(this);
@@ -16,7 +16,7 @@ void ImageAnalyzer::start()
 {
 	imageSource->startVideo();
 	videoStarted = true;
-	
+
 	ROS_DEBUG("Video started");
 }
 
@@ -24,7 +24,7 @@ void ImageAnalyzer::stop()
 {
 	imageSource->stopVideo();
 	videoStarted = false;
-	
+
 	ROS_DEBUG("Video stopped");
 }
 
@@ -34,7 +34,8 @@ bool ImageAnalyzer::isStarted()
 }
 
 /**
- * Returns a shallow copy of the last image. The image matrix is the same as the image matrix of the internal image.
+ * Returns a shallow copy of the last image. The image matrix is the same as the
+ *image matrix of the internal image.
  */
 cv::Mat* ImageAnalyzer::getImage()
 {
@@ -42,38 +43,36 @@ cv::Mat* ImageAnalyzer::getImage()
 		return 0;
 	} else {
 		imageMutex.lock();
-		cv::Mat* result = new cv::Mat(*lastImage);
+		cv::Mat *result = new cv::Mat(*lastImage);
 		imageMutex.unlock();
-		
+
 		return result;
 	}
 }
 
-void ImageAnalyzer::receiveImage(cv::Mat* image, long int time, int type)
+void ImageAnalyzer::receiveImage(cv::Mat *image, long int time, int type)
 {
 	imageMutex.lock();
-	
-	if (lastImage != 0) {
+
+	if (lastImage != 0)
 		delete lastImage;
-	}
-	
-// 	if (++imageReceivedCount % 150 == 0) {
-// 		ROS_DEBUG("Received %d images", imageReceivedCount);
-// 	}
-	
+
+//  if (++imageReceivedCount % 150 == 0) {
+//      ROS_DEBUG("Received %d images", imageReceivedCount);
+//  }
+
 	lastImage = image;
 	lastImageTime = time;
-	
+
 	processImage(new cv::Mat(*image), time);
-	
+
 	imageMutex.unlock();
 }
 
 ImageAnalyzer::~ImageAnalyzer()
 {
 	imageSource->removeImageReceiver(this);
-	
-	if (lastImage != 0) {
+
+	if (lastImage != 0)
 		delete lastImage;
-	}
 }
