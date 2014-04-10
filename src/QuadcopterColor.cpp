@@ -9,7 +9,9 @@ QuadcopterColor::QuadcopterColor(cv::Scalar minColor, cv::Scalar maxColor, int i
 	this->id = id;
 }
 
-QuadcopterColor::QuadcopterColor(uint8_t minHue, uint8_t maxHue, uint8_t minSaturation, uint8_t maxSaturation, uint8_t minValue, uint8_t maxValue, int id)
+QuadcopterColor::QuadcopterColor(uint8_t minHue, uint8_t maxHue, uint8_t minSaturation, uint8_t maxSaturation,
+                                 uint8_t minValue, uint8_t maxValue,
+                                 int id)
 {
 	this->minColor = cv::Scalar(minHue, minSaturation, minValue);
 	this->maxColor = cv::Scalar(maxHue, maxSaturation, maxValue);
@@ -24,7 +26,7 @@ QuadcopterColor::QuadcopterColor(uint32_t min, uint32_t max, int id)
 	uint8_t maxSaturation = (max >> 8) & 0xFF;
 	uint8_t minValue = min & 0xFF;
 	uint8_t maxValue = max & 0xFF;
-	
+
 	this->minColor = cv::Scalar(minHue, minSaturation, minValue);
 	this->maxColor = cv::Scalar(maxHue, maxSaturation, maxValue);
 	this->id = id;
@@ -49,7 +51,7 @@ std::string QuadcopterColor::toString()
 {
 	std::stringstream ss;
 	ss << "id: " << id << " H: " << minColor.val[0] << "-" << maxColor.val[0]
-					   << " S: " << minColor.val[1] << "-" << maxColor.val[1]
-					   << " V: " << minColor.val[2] << "-" << maxColor.val[2];
+	   << " S: " << minColor.val[1] << "-" << maxColor.val[1]
+	   << " V: " << minColor.val[2] << "-" << maxColor.val[2];
 	return ss.str();
 }
