@@ -1,6 +1,11 @@
 #ifndef ITRACKER_DATA_RECEIVER_HPP
 #define ITRACKER_DATA_RECEIVER_HPP
 
+/**
+ * Interface for receiving tracking data.
+ *
+ * @author Sebastian Schmidt
+ */
 class ITrackerDataReceiver {
 public:
 	/**

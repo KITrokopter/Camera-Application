@@ -3,6 +3,9 @@
 
 #include <ros/console.h>
 
+/**
+ * Creates a new ImageAnalyzer using the given CvKinect as image source.
+ */
 ImageAnalyzer::ImageAnalyzer(CvKinect *imageSource)
 {
 	this->imageSource = imageSource;
@@ -12,6 +15,9 @@ ImageAnalyzer::ImageAnalyzer(CvKinect *imageSource)
 	imageReceivedCount = 0;
 }
 
+/**
+ * Starts the sending of bgr images by the CvKinect.
+ */
 void ImageAnalyzer::start()
 {
 	imageSource->startVideo();
@@ -20,6 +26,9 @@ void ImageAnalyzer::start()
 	ROS_DEBUG("Video started");
 }
 
+/**
+ * Stops the sending of bgr images by the CvKinect.
+ */
 void ImageAnalyzer::stop()
 {
 	imageSource->stopVideo();
@@ -28,6 +37,11 @@ void ImageAnalyzer::stop()
 	ROS_DEBUG("Video stopped");
 }
 
+/**
+ * Returns if the image sending by the CvKinect is started.
+ *
+ * @return True if the CvKinect is currently sending images, false otherwise.
+ */
 bool ImageAnalyzer::isStarted()
 {
 	return videoStarted;
@@ -35,7 +49,7 @@ bool ImageAnalyzer::isStarted()
 
 /**
  * Returns a shallow copy of the last image. The image matrix is the same as the
- *image matrix of the internal image.
+ * image matrix of the internal image.
  */
 cv::Mat* ImageAnalyzer::getImage()
 {
@@ -69,6 +83,10 @@ void ImageAnalyzer::receiveImage(cv::Mat *image, long int time, int type)
 	imageMutex.unlock();
 }
 
+/**
+ * Destroys the image analyzer, but doesn't stop the picture sending of
+ * the CvKinect, if it was activated before.
+ */
 ImageAnalyzer::~ImageAnalyzer()
 {
 	imageSource->removeImageReceiver(this);

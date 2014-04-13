@@ -3,6 +3,14 @@
 #include <ros/console.h>
 #include <iostream>
 
+/**
+ * Creates a new object. The visual tracking options are disabled using this
+ * constructor.
+ *
+ * @param imageSource A Kinect connection.
+ * @param dataReceiver An object to send the calculated quadcopter positions
+ * to.
+ */
 CvImageProcessor::CvImageProcessor(CvKinect *imageSource, ITrackerDataReceiver *dataReceiver)
 	: ImageAnalyzer::ImageAnalyzer(imageSource)
 {
@@ -17,6 +25,17 @@ CvImageProcessor::CvImageProcessor(CvKinect *imageSource, ITrackerDataReceiver *
 	this->showMaskedImage = false;
 }
 
+/**
+ * Creates a new object.
+ *
+ * @param imageSource A Kinect connection.
+ * @param dataReceiver An object to send the calculated quadcopter positions
+ * to.
+ * @param showCameraImage True if the camera image should be shown during
+ * tracking. (Resource intensive and needs $DISPLAY to be set.)
+ * @param showMaskedImage True if the color masked image should be shown
+ * during tracking. (Resource intensive and needs $DISPLAY to be set.)
+ */
 CvImageProcessor::CvImageProcessor(CvKinect *imageSource, ITrackerDataReceiver *dataReceiver, bool showCameraImage,
                                    bool showMaskedImage)
 	: ImageAnalyzer::ImageAnalyzer(imageSource)
@@ -32,6 +51,12 @@ CvImageProcessor::CvImageProcessor(CvKinect *imageSource, ITrackerDataReceiver *
 	this->showMaskedImage = showMaskedImage;
 }
 
+/**
+ * Sets the intrinsics matrix for the undistortion of the camera images. The
+ * matrix will be copied internally.
+ *
+ * @param intrinsicsMatrix A 3x3 matrix containing double values.
+ */
 void CvImageProcessor::setIntrinsicsMatrix(cv::Mat *intrinsicsMatrix)
 {
 	if (this->intrinsicsMatrix != 0)
@@ -43,6 +68,12 @@ void CvImageProcessor::setIntrinsicsMatrix(cv::Mat *intrinsicsMatrix)
 		this->intrinsicsMatrix = 0;
 }
 
+/**
+ * Sets the distortion coefficients for the undistortion of the camera
+ * images. The matrix will be copied internally.
+ *
+ * @param distortionCoefficients A 5x1 matrix containing double values.
+ */
 void CvImageProcessor::setDistortionCoefficients(cv::Mat *distortionCoefficients)
 {
 	if (this->distortionCoefficients != 0)
@@ -82,6 +113,10 @@ std::vector<cv::Point2f>* CvImageProcessor::createImagePoints()
 	return result;
 }
 
+/**
+ * The function that calibrates the camera. You can use {@link
+ * startCalibration()} if you want a non-blocking method.
+ */
 void CvImageProcessor::calibrateCamera()
 {
 	clearCalibrationImages();
@@ -196,6 +231,9 @@ void CvImageProcessor::calibrateCamera()
 	calibrationImageReceiver = 0;
 }
 
+/**
+ * Deletes all images that were collected during calibration.
+ */
 void CvImageProcessor::clearCalibrationImages()
 {
 	while (calibrationImages.size() > 0) {
@@ -204,6 +242,10 @@ void CvImageProcessor::clearCalibrationImages()
 	}
 }
 
+/**
+ * Waits for the calibration to finish. Only works, if the
+ * {@link startCalibration} method was used.
+ */
 void CvImageProcessor::waitForCalibration()
 {
 	calibrationThread->join();
@@ -211,6 +253,15 @@ void CvImageProcessor::waitForCalibration()
 	calibrationThread = 0;
 }
 
+/**
+ * Returns an undistorted version of the given image.<br />
+ * Doesn't work if the camera wasn't calibrated before and no custom
+ * calibration data has  been set via the {@link setIntrinsicsMatrix}
+ * and {@link setDistortionCoefficients} methods.
+ * The caller has to delete the result.
+ *
+ * @param inputImage The image to undistort.
+ */
 cv::Mat* CvImageProcessor::undistortImage(cv::Mat *inputImage)
 {
 	cv::Mat *undistorted = new cv::Mat(inputImage->size(), inputImage->type());
@@ -218,6 +269,16 @@ cv::Mat* CvImageProcessor::undistortImage(cv::Mat *inputImage)
 	return undistorted;
 }
 
+/**
+ * Starts the camera calibration process.
+ *
+ * @param imageAmount The amount of images to use for the calibration.
+ * @param imageDelay The delay between two images.
+ * @param boardWidth The amount of corners on the x axis of the board.
+ * @param boardHeight The amount of corners on the y axis of the board.
+ * @param boardRectangleWidth The width of one board rectangle.
+ * @param boardRectangleHeight The height of one board rectangle.
+ */
 void CvImageProcessor::startCalibration(int imageAmount, int imageDelay, int boardWidth, int boardHeight,
                                         float boardRectangleWidth, float boardRectangleHeight,
                                         IImageReceiver *calibrationImageReceiver,
@@ -267,6 +328,9 @@ void CvImageProcessor::processImage(cv::Mat *image, long int time)
 	delete image;
 }
 
+/**
+ * Starts the tracking process.
+ */
 void CvImageProcessor::startTracking()
 {
 	if (isTracking)
@@ -284,6 +348,9 @@ void CvImageProcessor::startTracking()
 	ROS_DEBUG("Tracking started");
 }
 
+/**
+ * Stops the tracking process.
+ */
 void CvImageProcessor::stopTracking()
 {
 	if (!isTracking)
@@ -306,17 +373,32 @@ void CvImageProcessor::stopTracking()
 	ROS_DEBUG("Tracking stopped");
 }
 
+/**
+ * Sets the receiver for the calculated quadcopter vectors.
+ *
+ * @param receiver The receiver.
+ */
 void CvImageProcessor::setDataReceiver(ITrackerDataReceiver *receiver)
 {
 	this->dataReceiver = receiver;
 }
 
+/**
+ * Adds a quadcopter to be tracked.
+ *
+ * @param addQuadcopter The quadcopter.
+ */
 void CvImageProcessor::addQuadcopter(QuadcopterColor *qc)
 {
 	Tracker *tracker = new Tracker(dataReceiver, qc, showCameraImage, showMaskedImage);
 	trackers.push_back(tracker);
 }
 
+/**
+ * Removes the quadcopter with the given id.
+ *
+ * @param id The id.
+ */
 void CvImageProcessor::removeQuadcopter(int id)
 {
 	for (std::vector<Tracker*>::iterator it = trackers.begin(); it != trackers.end(); it++) {
@@ -328,6 +410,9 @@ void CvImageProcessor::removeQuadcopter(int id)
 	}
 }
 
+/**
+ * Removes all quadcopters.
+ */
 void CvImageProcessor::removeAllQuadcopters()
 {
 	while (trackers.size() > 0) {
@@ -336,31 +421,63 @@ void CvImageProcessor::removeAllQuadcopters()
 	}
 }
 
+/**
+ * Returns the intrinsics matrix of this camera. This can either be the
+ * result of a calibration, or a previously set intrinsics matrix.
+ * The caller has to delete the result.
+ *
+ * @return A 3x3 matrix containing double values.
+ */
 cv::Mat* CvImageProcessor::getIntrinsicsMatrix()
 {
 	return new cv::Mat(*intrinsicsMatrix);
 }
 
+/**
+ * Returns the distortion coefficients of this camera. This can either be
+ * the result of a calibration, or previously set distortion coefficients.
+ * The caller has to delete the result.
+ *
+ * @return A 5x1 matrix containing double values.
+ */
 cv::Mat* CvImageProcessor::getDistortionCoefficients()
 {
 	return new cv::Mat(*distortionCoefficients);
 }
 
+/**
+ * Aborts the calibration. The calibration data it used before the
+ * calibration will be kept.
+ */
 void CvImageProcessor::abortCalibration()
 {
 	abortCalibrationFlag = true;
 }
 
+/**
+ * Returns true if the camera is calibrated. That means, the camera has a
+ * not-null intrinsics matrix and a not-null distortion coefficients matrix.
+ *
+ * @return True if the camera is calibrated, false otherwise.
+ */
 bool CvImageProcessor::isCalibrated()
 {
 	return intrinsicsMatrix != 0 && distortionCoefficients != 0;
 }
 
+/**
+ * Sets the receiver for the undistorted images.
+ *
+ * @param receiver The receiver.
+ */
 void CvImageProcessor::setUndistortedImageReceiver(IUndistortedImageReceiver *receiver)
 {
 	undistortedImageReceiver = receiver;
 }
 
+/**
+ * Default destructor, ensures that all threads are stopped.
+ */
 CvImageProcessor::~CvImageProcessor()
 {
 	stopTracking();

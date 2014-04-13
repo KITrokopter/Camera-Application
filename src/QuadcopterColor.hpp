@@ -4,6 +4,17 @@
 #include <opencv2/core/core.hpp>
 #include <string>
 
+/**
+ * Stores a color range <-> quadcopter id mapping.
+ *
+ * The color range uses the HSV format.
+ *
+ * The hue range can be inverted, so that every color outside of the
+ * given range is a match. To do this, the maxHue value has to be
+ * smaller than the minHue value.
+ *
+ * @author Sebastian Schmidt
+ */
 class QuadcopterColor {
 private:
 	cv::Scalar minColor;

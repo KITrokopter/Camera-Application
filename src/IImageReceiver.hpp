@@ -3,6 +3,11 @@
 
 #include <opencv2/core/core.hpp>
 
+/**
+ * Listener that receives images from the Kinect.
+ *
+ * @author Sebastian Schmidt
+ */
 class IImageReceiver {
 public:
 	/**

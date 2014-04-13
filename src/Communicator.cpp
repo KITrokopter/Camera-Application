@@ -7,11 +7,11 @@
 
 /**
  * Creates a new communicator, using the given image source and image processor.
- * 
+ *
  * It announces itself to the API and aborts the application if that doesn't work.
- * 
- * @param device: The image source.
- * @param analyzer: The image processor.
+ *
+ * @param device The image source.
+ * @param analyzer The image processor.
  */
 Communicator::Communicator(CvKinect *device, CvImageProcessor *analyzer) :
 	device(device),
@@ -138,7 +138,7 @@ void Communicator::calibrationFinished(cv::Mat *intrinsicsMatrix, cv::Mat *disto
 
 /**
  * Sends a picture via ROS using the Picture topic.
- * 
+ *
  * @param data The image data.
  * @param timestamp The time the image was taken.
  * @param type The type of the image (0 for normal image, 1 for calibration image).
@@ -157,9 +157,9 @@ void Communicator::sendPicture(camera_application::Picture::_image_type &data, u
 
 /**
  * Callback for the initialization of the camera application. Sets the quadcopter ids and colors.
- * 
- * @param req: The ROS service request.
- * @param res: The ROS service response.
+ *
+ * @param req The ROS service request.
+ * @param res The ROS service response.
  */
 bool Communicator::handleInitializeCameraService(
     camera_application::InitializeCameraService::Request &req,
@@ -188,8 +188,8 @@ bool Communicator::handleInitializeCameraService(
 
 /**
  * Callback for the activation and deactivation of picture sending.
- * 
- * @param msg: The ROS message.
+ *
+ * @param msg The ROS message.
  */
 void Communicator::handlePictureSendingActivation(
     const camera_application::PictureSendingActivation::Ptr &msg)
@@ -206,7 +206,9 @@ void Communicator::handlePictureSendingActivation(
 }
 
 /**
- * 
+ * Starts the calibration with the parameters passed via the ROS topic.
+ *
+ * @param msg The ROS message.
  */
 void Communicator::handleCalibrateCamera(
     const camera_application::CalibrateCamera::Ptr &msg)
@@ -220,6 +222,11 @@ void Communicator::handleCalibrateCamera(
 	}
 }
 
+/**
+ * Gives the camera the calibration data that should be used for undistortion.
+ *
+ * @param msg The ROS message.
+ */
 void Communicator::handleCameraCalibrationData(
     const camera_application::CameraCalibrationData::Ptr &msg)
 {
@@ -242,6 +249,11 @@ void Communicator::handleCameraCalibrationData(
 	}
 }
 
+/**
+ * Processes the system start and stop message.
+ *
+ * @param msg The ROS message.
+ */
 void Communicator::handleSystem(
     const api_application::System::Ptr &msg)
 {

@@ -9,6 +9,11 @@
 #include "Mutex.hpp"
 #include "ITrackerDataReceiver.hpp"
 
+/**
+ * Tracks a single quadcopter.
+ *
+ * @author Sebastian Schmidt
+ */
 class Tracker {
 private:
 	// Thread control
@@ -31,7 +36,7 @@ private:
 	// Methods
 	void executeTracker();
 	cv::Mat createColorMapImage(cv::Mat &image, cv::Mat &mapImage, cv::Mat &hsvImage);
-	void drawCross(cv::Mat mat, int i, int j);
+	void drawCross(cv::Mat &mat, int i, int j);
 
 public:
 	Tracker(ITrackerDataReceiver *dataReceiver, QuadcopterColor *color);

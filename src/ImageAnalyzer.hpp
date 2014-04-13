@@ -6,6 +6,11 @@
 #include "IImageReceiver.hpp"
 #include "Mutex.hpp"
 
+/**
+ * Abstract class to receive and process images from the Kinect.
+ *
+ * @author Sebastian Schmidt
+ */
 class ImageAnalyzer : public IImageReceiver {
 private:
 	cv::Mat *lastImage;

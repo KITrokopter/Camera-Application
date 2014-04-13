@@ -13,14 +13,14 @@
 
 #include "profiling.hpp"
 
-// Use this to use the register keyword in some places. Might make things
-// faster, but I didn't test it.
-// #define QC_REGISTER
 
-// Use this for debugging the object recognition. WARNING: Might lead to errors
-// or strange behaviour when used with visualTracker == true.
-// #define QC_DEBUG_TRACKER
-
+/**
+ * Creates a new tracker for the given quadcopter.
+ * showCameraImage and showMaskedImage default to false.
+ *
+ * @param dataReceiver The receiver for the tracking data.
+ * @param color The quadcopter id <-> color mapping.
+ */
 Tracker::Tracker(ITrackerDataReceiver *dataReceiver, QuadcopterColor *color)
 {
 	this->dataReceiver = dataReceiver;
@@ -32,6 +32,16 @@ Tracker::Tracker(ITrackerDataReceiver *dataReceiver, QuadcopterColor *color)
 	this->showMaskedImage = false;
 }
 
+/**
+ * Creates a new tracker for the given quadcopter.
+ *
+ * @param dataReceiver The receiver for the tracking data.
+ * @param color The quadcopter id <-> color mapping.
+ * @param showCameraImage True if the camera image should be shown during tracking.
+ * (Resource intensive and needs $DISPLAY to be set.)
+ * @param showMaskedImage True if the color masked image should be shown during tracking.
+ * (Resource intensive and needs $DISPLAY to be set.)
+ */
 Tracker::Tracker(ITrackerDataReceiver *dataReceiver, QuadcopterColor *color, bool showCameraImage, bool showMaskedImage)
 {
 	this->dataReceiver = dataReceiver;
@@ -59,10 +69,20 @@ Tracker::Tracker(ITrackerDataReceiver *dataReceiver, QuadcopterColor *color, boo
 	}
 }
 
+/**
+ * Destroys the tracker and stops the tracking thread, if it is running.
+ */
 Tracker::~Tracker()
 {
+	if (isStarted()) {
+		stop();
+		join();
+	}
 }
 
+/**
+ * Starts the tracking using a new thread.
+ */
 void Tracker::start()
 {
 	if (thread != 0)
@@ -80,6 +100,9 @@ void Tracker::start()
 	thread = new boost::thread(boost::bind(&Tracker::executeTracker, this));
 }
 
+/**
+ * Requests the tracking thread to stop.
+ */
 void Tracker::stop()
 {
 	if (thread == 0)
@@ -88,6 +111,9 @@ void Tracker::stop()
 	stopFlag = true;
 }
 
+/**
+ * Joins the tracking thread.
+ */
 void Tracker::join()
 {
 	if (thread != 0) {
@@ -102,11 +128,22 @@ void Tracker::join()
 	}
 }
 
+/**
+ * Returns true, if the tracking is started.
+ *
+ * @return True, if the tracking is started.
+ */
 bool Tracker::isStarted()
 {
 	return thread != 0;
 }
 
+/**
+ * Sets the next image for the tracker. The old image is deleted.
+ *
+ * @param image The image.
+ * @param time The time the image was taken.
+ */
 void Tracker::setNextImage(cv::Mat *image, long int time)
 {
 	imageMutex.lock();
@@ -121,15 +158,25 @@ void Tracker::setNextImage(cv::Mat *image, long int time)
 	imageMutex.unlock();
 }
 
+/**
+ * Returns the QuadcopterColor that is tracked by this object.
+ *
+ * @return The QuadcopterColor that is tracked by this object.
+ */
 QuadcopterColor* Tracker::getQuadcopterColor()
 {
 	return (QuadcopterColor*) qc;
 }
 
-void Tracker::drawCross(cv::Mat mat, const int x, const int y)
+/**
+ * Draws a cross to the specified location on the given image.
+ *
+ * @param mat The image.
+ * @param x The x coordinate of the cross center.
+ * @param y The y coordinage of the cross center.
+ */
+void Tracker::drawCross(cv::Mat &mat, const int x, const int y)
 {
-	ROS_DEBUG("Drawing cross.");
-
 	for (int i = x - 10; i <= x + 10; i++) {
 		int j = y;
 
@@ -139,7 +186,7 @@ void Tracker::drawCross(cv::Mat mat, const int x, const int y)
 
 			unsigned char color;
 
-			if (i + j % 3 > 0)
+			if ((i + j) % 3 != 0)
 				color = 0xFF;
 			else
 				color = 0;
@@ -159,7 +206,7 @@ void Tracker::drawCross(cv::Mat mat, const int x, const int y)
 
 			unsigned char color;
 
-			if (i + j % 3 > 0)
+			if ((i + j) % 3 != 0)
 				color = 0xFF;
 			else
 				color = 0;
@@ -169,10 +216,11 @@ void Tracker::drawCross(cv::Mat mat, const int x, const int y)
 			element[2] = color;
 		}
 	}
-
-	ROS_DEBUG("Cross drawed");
 }
 
+/**
+ * Runs the tracking.
+ */
 void Tracker::executeTracker()
 {
 	#define PI (3.1415926535897932384626433832795028841)
@@ -184,11 +232,11 @@ void Tracker::executeTracker()
 	bool quadcopterTracked = false;
 
 	// Images
-	cv::Mat cameraImage(cv::Size(640, 480), CV_8UC3);
-	cv::Mat maskedImage(cv::Size(640, 480), CV_8UC3);
-	cv::Mat image(cv::Size(640, 480), CV_8UC3);
-	cv::Mat mapImage(cv::Size(640, 480), CV_8UC1);
-	cv::Mat hsvImage(cv::Size(640, 480), CV_8UC3);
+	cv::Mat cameraImage(cv::Size(640, 480), CV_8UC3); // Only for showCameraImage == true.
+	cv::Mat maskedImage(cv::Size(640, 480), CV_8UC3); // Only for showMaskedImage == true.
+	cv::Mat image(cv::Size(640, 480), CV_8UC3); // The raw image from the camera.
+	cv::Mat mapImage(cv::Size(640, 480), CV_8UC1); // The color mapped image.
+	cv::Mat hsvImage(cv::Size(640, 480), CV_8UC3);  // The raw image in hsv format.
 
 	// CvBlob
 	cvb::CvBlobs blobs;
@@ -328,52 +376,43 @@ void Tracker::executeTracker()
 	ROS_INFO("Tracker with id %d terminated", ((QuadcopterColor*) this->qc)->getId());
 }
 
+/**
+ * Filters the given image using the QuadcopterColor.
+ * The result is written to mapImage. White pixels mean in range,
+ * black pixels mean out of range.
+ *
+ * @param image The raw image.
+ * @param mapImage The resulting mapped image. (Output array)
+ * @param hsvImage The raw image in hsv format. (Output array)
+ */
 cv::Mat Tracker::createColorMapImage(cv::Mat &image, cv::Mat &mapImage, cv::Mat &hsvImage)
 {
 	START_CLOCK(convertColorClock)
+
+	// This ensures that the mapImage has a buffer.
+	// Since the buffer is never freed during tracking, this only allocates memory once.
 	mapImage.reserve(480);
 
-	// Debug HSV color range
-	// unsigned char* element = image->data + image->step[0] * 240 +
-	// image->step[1] * 320;
-	// ROS_DEBUG("R: %d G: %d B: %d", element[2], element[1], element[0]);
-
 	cv::cvtColor(image, hsvImage, CV_BGR2HSV);
-
-	// Debug HSV color range
-	// ROS_DEBUG("H: %d S: %d V: %d", element[0], element[1], element[2]);
 
 	STOP_CLOCK(convertColorClock, "Converting colors took: ")
 	START_CLOCK(maskImageClock)
 
-	// Trying to make this fast.
-	#ifdef QC_REGISTER
-	register uint8_t * current, *end, *source;
-	register int minHue, maxHue, minSaturation, /*maxSaturation,*/ minValue /*,
-	                                                                          maxValue*/  ;
-	#else
 	uint8_t * current, *end, *source;
-	int minHue, maxHue, minSaturation, /*maxSaturation,*/ minValue /*,
-	                                                                 maxValue*/  ;
-	#endif
+	int minHue, maxHue, minSaturation, minValue;
 
 	QuadcopterColor *color = (QuadcopterColor*) qc;
 
 	minHue = color->getMinColor().val[0];
 	maxHue = color->getMaxColor().val[0];
 	minSaturation = color->getMinColor().val[1];
-	// maxSaturation = color->getMaxColor().val[1]; // unused
 	minValue = color->getMinColor().val[2];
-	// maxValue = color->getMaxColor().val[2]; // unused
 
 	end = mapImage.data + mapImage.size().width * mapImage.size().height;
 	source = hsvImage.data;
 
 	if (minHue < maxHue)
 		for (current = mapImage.data; current < end; ++current, source += 3) {
-			// if (*source > maxHue || *source < minHue || *(++source) >
-			// maxSaturation || *source < minSaturation || *(++source) >
-			// maxValue || *(source++) < minValue) {
 			if (*source > maxHue || *source < minHue || *(source + 1) < minSaturation || *(source + 2) < minValue)
 				*current = 0;
 			else
@@ -382,9 +421,6 @@ cv::Mat Tracker::createColorMapImage(cv::Mat &image, cv::Mat &mapImage, cv::Mat 
 	else
 		// Hue interval inverted here.
 		for (current = mapImage.data; current < end; ++current, source += 3) {
-			// if (*source < maxHue || *source > minHue || *(++source) >
-			// maxSaturation || *source < minSaturation || *(++source) >
-			// maxValue || *(source++) < minValue) {
 			if ((*source > maxHue && *source < minHue) || *(source + 1) < minSaturation || *(source + 2) < minValue)
 				*current = 0;
 			else
@@ -395,4 +431,3 @@ cv::Mat Tracker::createColorMapImage(cv::Mat &image, cv::Mat &mapImage, cv::Mat 
 
 	return mapImage;
 }
-

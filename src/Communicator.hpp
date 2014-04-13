@@ -24,7 +24,7 @@
 
 /**
  * Provides communication with ROS.
- * 
+ *
  * @author Sebastian Schmidt
  * @author Lukas Werling
  */
@@ -37,7 +37,7 @@ class Communicator : public IImageReceiver, public ITrackerDataReceiver,
 		void receiveTrackingData(cv::Scalar direction, int id, long int time);
 		void calibrationFinished(cv::Mat *intrinsicsMatrix, cv::Mat *distortionCoefficients);
 		void receiveUndistortedImage(cv::Mat *image, long int time);
-		
+
 		void sendPicture(camera_application::Picture::_image_type &data, uint64_t timestamp, int type);
 
 	protected:
@@ -45,17 +45,17 @@ class Communicator : public IImageReceiver, public ITrackerDataReceiver,
 		bool handleInitializeCameraService(
 				camera_application::InitializeCameraService::Request &req,
 				camera_application::InitializeCameraService::Response &res);
-		
+
 		// Subscribers
 		void handlePictureSendingActivation(
 				const camera_application::PictureSendingActivation::Ptr &msg);
-		
+
 		void handleCalibrateCamera(
 				const camera_application::CalibrateCamera::Ptr &msg);
-		
+
 		void handleCameraCalibrationData(
 				const camera_application::CameraCalibrationData::Ptr &msg);
-		
+
 		void handleSystem(
 				const api_application::System::Ptr &msg);
 
@@ -68,7 +68,7 @@ class Communicator : public IImageReceiver, public ITrackerDataReceiver,
 		ros::Publisher picturePublisher;
 		ros::Publisher rawPositionPublisher;
 		ros::Publisher cameraCalibrationDataPublisher;
-		
+
 		// Tracking
 		CvKinect *device;
 		CvImageProcessor *analyzer;

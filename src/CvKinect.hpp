@@ -10,6 +10,12 @@
 #include "Mutex.hpp"
 #include "IImageReceiver.hpp"
 
+/**
+ * C++ interface for libfreenect.
+ *
+ * @author http://openkinect.org/wiki/C%2B%2BOpenCvExample
+ * @author Sebastian Schmidt
+ */
 class CvKinect : public Freenect::FreenectDevice {
 public:
 	static const int KINECT_IMAGE_WIDTH = 640;

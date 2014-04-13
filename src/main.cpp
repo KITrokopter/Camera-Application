@@ -15,6 +15,14 @@
 #include "CvImageProcessor.hpp"
 #include "Communicator.hpp"
 
+/**
+ * Checks if the given string starts with the
+ * given prefix.
+ *
+ * @param prefix The prefix.
+ * @param str The string.
+ * @return True if str starts with prefix, false otherwise.
+ */
 bool startsWith(const char *prefix, const char *str)
 {
 	size_t lenPrefix = strlen(prefix),
@@ -22,7 +30,11 @@ bool startsWith(const char *prefix, const char *str)
 	return lenStr < lenPrefix ? false : strncmp(prefix, str, lenPrefix) == 0;
 }
 
-// Gets the ip address of the machine
+/**
+ * Returns the ip address of the machine.
+ *
+ * @return The textual representation of the ip address of the machine.
+ */
 char* getIpAddress()
 {
 	struct ifaddrs *ifAddrStruct = NULL;
@@ -64,6 +76,13 @@ char* getIpAddress()
 	return result;
 }
 
+/**
+ * Runs the camera application.
+ *
+ * @param argc Unused.
+ * @param argv Unsued.
+ * @return Never returns, calls exit(0).
+ */
 int main(int argc, char **argv)
 {
 	std::cout << "Starting Camera Application" << std::endl;
@@ -120,6 +139,8 @@ int main(int argc, char **argv)
 	}
 
 	std::cout << "Camera Application successfully terminated" << std::endl;
+	
+	// Fix for some threads not terminated, probably caused by libfreenect.
 	exit(0);
 }
 
