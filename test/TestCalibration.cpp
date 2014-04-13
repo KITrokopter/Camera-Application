@@ -10,6 +10,11 @@
 #include "../src/ImageAnalyzer.hpp"
 #include "../src/CvImageProcessor.hpp"
 
+/**
+ * Displays the video feed from the camera.
+ *
+ * @author Sebastian Schmidt
+ */
 class TestCalibration : public IImageReceiver {
 private:
 	cv::Mat *lastImage;
@@ -50,6 +55,9 @@ TestCalibration::~TestCalibration()
 	cv::destroyWindow(name);
 }
 
+/**
+ * Test to ensure calibration works.
+ */
 int main(int argc, char **argv)
 {
 	std::cout << "Starting ROS Node" << std::endl;

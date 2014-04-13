@@ -9,6 +9,11 @@
 #include "../src/ImageAnalyzer.hpp"
 #include "../src/CvImageProcessor.hpp"
 
+/**
+ * Displays the video feed from the camera.
+ *
+ * @author Sebastian Schmidt
+ */
 class TestCalibration : public IImageReceiver {
 private:
 	cv::Mat *lastImage;
@@ -45,6 +50,11 @@ TestCalibration::~TestCalibration()
 	cv::destroyWindow("Calibration Test");
 }
 
+/**
+ * Prints tracking results to the console.
+ *
+ * @author Sebastian Schmidt
+ */
 class TestTracker : public ITrackerDataReceiver {
 public:
 	TestTracker()
@@ -63,6 +73,9 @@ public:
 	}
 };
 
+/**
+ * Test if tracking of 2 quadcopters works.
+ */
 int main(int argc, char **argv)
 {
 	std::cout << "Starting ROS Node" << std::endl;

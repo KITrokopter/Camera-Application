@@ -9,6 +9,11 @@
 #include "../src/ImageAnalyzer.hpp"
 #include "../src/CvImageProcessor.hpp"
 
+/**
+ * Test if we can take a picture with the Kinect.
+ *
+ * @author Sebastian Schmidt
+ */
 int main(int argc, char **argv)
 {
 	std::cout << "Starting ROS Node" << std::endl;

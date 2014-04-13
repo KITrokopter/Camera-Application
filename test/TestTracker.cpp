@@ -13,6 +13,11 @@
 #include <ctime>    // For time()
 #include <cstdlib>  // For srand() and rand()
 
+/**
+ * Prints tracking results to the console.
+ *
+ * @author Sebastian Schmidt
+ */
 class TestTracker : public ITrackerDataReceiver {
 public:
 	TestTracker()
@@ -31,6 +36,9 @@ public:
 	}
 };
 
+/**
+ * Test if analyzing of one image works.
+ */
 int main(int argc, char **argv)
 {
 	std::cout << "Starting ROS Node" << std::endl;
