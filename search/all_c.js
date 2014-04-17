@@ -1,0 +1,9 @@
+var searchData=
+[
+  ['receiveimage',['receiveImage',['../classCommunicator.html#ab73d0e3484a242200e8846d26a943e53',1,'Communicator::receiveImage()'],['../classIImageReceiver.html#a54752d3a97fa019b5facb793d2d2d094',1,'IImageReceiver::receiveImage()'],['../classImageAnalyzer.html#a2abab216a7d8a5d9dee9e6d29a32490c',1,'ImageAnalyzer::receiveImage()'],['../classTestCalibration.html#ac2e9235ada39a37944639f4b4ec42f41',1,'TestCalibration::receiveImage(cv::Mat *image, long int time, int type)'],['../classTestCalibration.html#ac2e9235ada39a37944639f4b4ec42f41',1,'TestCalibration::receiveImage(cv::Mat *image, long int time, int type)']]],
+  ['receivetrackingdata',['receiveTrackingData',['../classCommunicator.html#ae3547cfa1179332ca7d928718efabb13',1,'Communicator::receiveTrackingData()'],['../classITrackerDataReceiver.html#a6e3c1898def23ee94c1e10667ad77241',1,'ITrackerDataReceiver::receiveTrackingData()'],['../classTestTracker.html#ab10d79ca36df6652b0716ddecd2548c1',1,'TestTracker::receiveTrackingData(cv::Scalar direction, int id, long int time)'],['../classTestTracker.html#ab10d79ca36df6652b0716ddecd2548c1',1,'TestTracker::receiveTrackingData(cv::Scalar direction, int id, long int time)']]],
+  ['receiveundistortedimage',['receiveUndistortedImage',['../classCommunicator.html#af682a5814ecc233f0a61921028934e8d',1,'Communicator::receiveUndistortedImage()'],['../classIUndistortedImageReceiver.html#af3133b07fc00195fcd0d04b4a03b2039',1,'IUndistortedImageReceiver::receiveUndistortedImage()']]],
+  ['removeallquadcopters',['removeAllQuadcopters',['../classCvImageProcessor.html#a0d00e27c8fe539432dcc8c532eb7cf57',1,'CvImageProcessor']]],
+  ['removeimagereceiver',['removeImageReceiver',['../classCvKinect.html#adeb4cbdaf4cc37e9aaa14ffc2765d190',1,'CvKinect']]],
+  ['removequadcopter',['removeQuadcopter',['../classCvImageProcessor.html#a10644c751cc239a4b9b75493610381d5',1,'CvImageProcessor']]]
+];
